@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Front end web da bancada ATMegaPesta V1. A lógica vem de @atmegapesta/partilhado.",
+  "description": "Front end web da bancada ATMegaPesta V1. A lógica vem de @atmegapesta/shared.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@atmegapesta/partilhado": "*",
+    "@atmegapesta/shared": "*",
     "@microsoft/signalr": "^9.0.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"

@@ -1,74 +1,74 @@
 /**
- * A paleta e as medidas da bancada, em valores. São os mesmos de
- * ATMegaPestaV1/Themes/LightTheme.xaml — o front end React não inventa um aspecto novo,
- * usa o do WPF para quem passa de um para o outro reconhecer a bancada.
+ * The bench palette and measurements, as values. They are the same ones as in
+ * ATMegaPestaV1/Themes/LightTheme.xaml — the React front end does not invent a new look,
+ * it uses the WPF's so whoever moves from one to the other recognises the bench.
  *
- * Ficam em valores, e não em CSS, porque o React Native não tem folhas de estilo: o web
- * converte-os em custom properties, o nativo passa-os a StyleSheet.
+ * They stay as values, and not as CSS, because React Native has no stylesheets: the web
+ * turns them into custom properties, native turns them into a StyleSheet.
  */
-export const cores = {
-  fundoJanela: '#F5F5F5',
-  fundoHeader: '#E0E0E0',
-  fundoMenu: '#E8E8E8',
-  fundoCard: '#FFFFFF',
-  fundoSubCard: '#F0F0F0',
-  fundoInput: '#EBEBEB',
-  separador: '#CCCCCC',
+export const colours = {
+  windowBackground: '#F5F5F5',
+  headerBackground: '#E0E0E0',
+  menuBackground: '#E8E8E8',
+  cardBackground: '#FFFFFF',
+  subCardBackground: '#F0F0F0',
+  inputBackground: '#EBEBEB',
+  separator: '#CCCCCC',
 
-  textoTitulo: '#1A1A1A',
-  textoNormal: '#444444',
-  textoSubtil: '#888888',
-  textoDesactivado: '#BBBBBB',
+  textTitle: '#1A1A1A',
+  textNormal: '#444444',
+  textSubtle: '#888888',
+  textDisabled: '#BBBBBB',
 
-  menuAccento: '#555555',
+  menuAccent: '#555555',
 
-  btnEscuro: '#1A1A1A',
-  btnEscuroHover: '#333333',
-  btnEscuroTexto: '#FFFFFF',
+  btnDark: '#1A1A1A',
+  btnDarkHover: '#333333',
+  btnDarkText: '#FFFFFF',
 
-  btnClaro: '#DDDDDD',
-  btnClaroHover: '#CCCCCC',
-  btnClaroTexto: '#1A1A1A',
+  btnLight: '#DDDDDD',
+  btnLightHover: '#CCCCCC',
+  btnLightText: '#1A1A1A',
 
-  btnDesactivado: '#CCCCCC',
-  btnDesactivadoTexto: '#999999',
+  btnDisabled: '#CCCCCC',
+  btnDisabledText: '#999999',
 
-  pino: '#DDDDDD',
-  pinoTexto: '#1A1A1A',
+  pin: '#DDDDDD',
+  pinText: '#1A1A1A',
 
   tag: '#E2E2E2',
-  tagTexto: '#333333',
+  tagText: '#333333',
 
   badge: '#6B7280',
-  badgeTexto: '#FFFFFF',
+  badgeText: '#FFFFFF',
 
-  progressoFundo: '#DDDDDD',
-  progressoBarra: '#1A1A1A',
+  progressBackground: '#DDDDDD',
+  progressBar: '#1A1A1A',
 
-  erro: '#D9222B',
-  sucesso: '#2D7A4F',
-  aviso: '#D97706',
-  inactivo: '#CCCCCC',
+  error: '#D9222B',
+  success: '#2D7A4F',
+  warning: '#D97706',
+  idle: '#CCCCCC',
 } as const;
 
-/** A cor de cada estado de indicador — o que os LEDs do WPF pintavam. */
-export const coresLed = {
-  inactivo: cores.inactivo,
-  ok: cores.sucesso,
-  aviso: cores.aviso,
-  erro: cores.erro,
+/** The colour of each indicator state — what the WPF LEDs painted. */
+export const ledColours = {
+  idle: colours.idle,
+  ok: colours.success,
+  warning: colours.warning,
+  error: colours.error,
 } as const;
 
-export const raios = {
-  tenue: 2,
-  pequeno: 4,
-  medio: 6,
-  grande: 8,
-  enorme: 12,
-  pilula: 11,
+export const radii = {
+  tiny: 2,
+  small: 4,
+  medium: 6,
+  large: 8,
+  huge: 12,
+  pill: 11,
 } as const;
 
-export const espacos = {
+export const spacing = {
   xs: 4,
   sm: 8,
   md: 12,
@@ -77,8 +77,8 @@ export const espacos = {
   xxl: 32,
 } as const;
 
-export const tipografia = {
-  familia: '"Segoe UI", system-ui, -apple-system, sans-serif',
-  // Para os fuses e a assinatura: hexadecimal alinha-se melhor a largura fixa.
-  familiaMono: '"Cascadia Mono", "Consolas", ui-monospace, monospace',
+export const typography = {
+  family: '"Segoe UI", system-ui, -apple-system, sans-serif',
+  // For the fuses and the signature: hexadecimal lines up better at a fixed width.
+  familyMono: '"Cascadia Mono", "Consolas", ui-monospace, monospace',
 } as const;

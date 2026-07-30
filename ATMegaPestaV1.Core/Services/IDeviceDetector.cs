@@ -1,27 +1,27 @@
 namespace ATMegaPestaV1.Services;
 
 /// <summary>
-/// O que a varredura ao USB encontrou na bancada. São os dois dispositivos que têm de
-/// estar presentes antes de a app deixar avançar: o CH340 (porta série para o master) e
-/// o USBAsp (programador ISP).
+/// What the USB scan found on the rig. These are the two devices that have to be present
+/// before the app lets you move on: the CH340 (serial port to the master) and the USBAsp
+/// (ISP programmer).
 /// </summary>
-/// <param name="PortaCH340">Porta onde o CH340 apareceu (ex.: "COM3"), ou null se não está lá.</param>
-/// <param name="UsbAspLigado">O programador USBAsp está enumerado no USB.</param>
-public record DispositivosDetectados(string? PortaCH340, bool UsbAspLigado)
+/// <param name="Ch340Port">Port where the CH340 showed up (e.g. "COM3"), or null if absent.</param>
+/// <param name="UsbAspConnected">The USBAsp programmer is enumerated on the USB.</param>
+public record DetectedDevices(string? Ch340Port, bool UsbAspConnected)
 {
-    /// <summary>A bancada tem tudo o que é preciso para prosseguir.</summary>
-    public bool Completa => PortaCH340 is not null && UsbAspLigado;
+    /// <summary>The rig has everything it needs to proceed.</summary>
+    public bool Complete => Ch340Port is not null && UsbAspConnected;
 
-    /// <summary>Bancada onde não apareceu nada — o estado de arranque de uma varredura falhada.</summary>
-    public static DispositivosDetectados Nenhum => new(null, false);
+    /// <summary>A rig where nothing showed up — the starting state of a failed scan.</summary>
+    public static DetectedDevices None => new(null, false);
 }
 
 /// <summary>
-/// Varre o USB à procura do hardware da bancada. É o primeiro passo do arranque: até isto
-/// dar resultado não há porta série para falar com o master nem programador para chegar
-/// ao chip-alvo.
+/// Scans the USB for the rig's hardware. This is the first step at startup: until it
+/// comes back with something there is no serial port to talk to the master and no
+/// programmer to reach the target chip.
 /// </summary>
 public interface IDeviceDetector
 {
-    Task<DispositivosDetectados> DetectarAsync(CancellationToken ct = default);
+    Task<DetectedDevices> DetectAsync(CancellationToken ct = default);
 }

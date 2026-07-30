@@ -4,70 +4,70 @@ using System.Text;
 namespace ATMegaPestaV1.Services;
 
 /// <summary>
-/// Implementação real do BusManager via porta série CH340.
-/// Fala com o menu numérico do firmware Prog_Tester V1.2.
+/// Real BusManager implementation over the CH340 serial port.
+/// Talks to the numeric menu of the Prog_Tester V1.2 firmware.
 /// </summary>
 public class BusManager : IBusManager
 {
-    private readonly string _portaCom;
+    private readonly string _comPort;
     private readonly int _baudRate;
     private readonly int _timeoutMs;
 
-    // O teste SPI espera até 3 s pelo COM_SET do Nano e só depois faz a
-    // transferência, pelo que precisa de uma janela de leitura maior.
-    private const int TimeoutSpiMs = 8000;
-    private const int TimeoutSerial2Ms = 3000;
+    // The SPI test waits up to 3 s for the Nano's COM_SET and only then does the
+    // transfer, so it needs a wider read window.
+    private const int SpiTimeoutMs = 8000;
+    private const int Serial2TimeoutMs = 3000;
 
-    public BusManager(string portaCom, int baudRate, int timeoutMs)
+    public BusManager(string comPort, int baudRate, int timeoutMs)
     {
-        _portaCom = portaCom;
+        _comPort = comPort;
         _baudRate = baudRate;
         _timeoutMs = timeoutMs;
     }
 
-    public Task<AssinaturaResult> VerificarAssinaturaAsync(CancellationToken ct = default) =>
+    public Task<SignatureResult> VerifySignatureAsync(CancellationToken ct = default) =>
         Task.Run(() =>
         {
-            var resposta = EnviarComando(MenuTester.Assinatura, _timeoutMs);
+            var response = SendCommand(MenuTester.Signature, _timeoutMs);
 
-            if (resposta is null || resposta.StartsWith("Erro:"))
-                return new AssinaturaResult(false, null, resposta);
+            if (response is null || response.StartsWith("Erro:"))
+                return new SignatureResult(false, null, response);
 
-            var assinatura = resposta
+            var signature = response
                 .Split('\n')
                 .Select(l => l.Trim())
-                .FirstOrDefault(l => l == MenuTester.AssinaturaEsperada);
+                .FirstOrDefault(l => l == MenuTester.ExpectedSignature);
 
-            return new AssinaturaResult(assinatura is not null, assinatura, resposta);
+            return new SignatureResult(signature is not null, signature, response);
         }, ct);
 
     public Task<string?> SelectUsbAspAsync(CancellationToken ct = default) =>
-        EnviarComandoAsync(MenuTester.AtivarUsbAsp, _timeoutMs, ct);
+        SendCommandAsync(MenuTester.EnableUsbAsp, _timeoutMs, ct);
 
     public Task<string?> SwitchToMegaAsync(CancellationToken ct = default) =>
-        EnviarComandoAsync(MenuTester.AtivarMegaMaster, _timeoutMs, ct);
+        SendCommandAsync(MenuTester.EnableMegaMaster, _timeoutMs, ct);
 
-    public Task<string?> IsolarBarramentoAsync(CancellationToken ct = default) =>
-        EnviarComandoAsync(MenuTester.IsolarBarramento, _timeoutMs, ct);
+    public Task<string?> IsolateBusAsync(CancellationToken ct = default) =>
+        SendCommandAsync(MenuTester.IsolateBus, _timeoutMs, ct);
 
-    public Task<string?> TestarSerial2Async(CancellationToken ct = default) =>
-        EnviarComandoAsync(MenuTester.TestarSerial2, Math.Max(_timeoutMs, TimeoutSerial2Ms), ct);
+    public Task<string?> TestSerial2Async(CancellationToken ct = default) =>
+        SendCommandAsync(MenuTester.TestSerial2, Math.Max(_timeoutMs, Serial2TimeoutMs), ct);
 
-    public Task<string?> ExecutarTesteSpiAsync(CancellationToken ct = default) =>
-        EnviarComandoAsync(MenuTester.TesteSpi, Math.Max(_timeoutMs, TimeoutSpiMs), ct);
+    public Task<string?> RunSpiTestAsync(CancellationToken ct = default) =>
+        SendCommandAsync(MenuTester.SpiTest, Math.Max(_timeoutMs, SpiTimeoutMs), ct);
 
-    private Task<string?> EnviarComandoAsync(char opcao, int timeoutMs, CancellationToken ct) =>
-        Task.Run(() => EnviarComando(opcao, timeoutMs), ct);
+    private Task<string?> SendCommandAsync(char option, int timeoutMs, CancellationToken ct) =>
+        Task.Run(() => SendCommand(option, timeoutMs), ct);
 
-    private string? EnviarComando(char opcao, int timeoutMs)
+    private string? SendCommand(char option, int timeoutMs)
     {
         try
         {
-            using var serial = new SerialPort(_portaCom, _baudRate, Parity.None, 8, StopBits.One)
+            using var serial = new SerialPort(_comPort, _baudRate, Parity.None, 8, StopBits.One)
             {
                 ReadTimeout = timeoutMs,
                 WriteTimeout = _timeoutMs,
-                // DTR/RTS desligados para o CH340 não reiniciar o Mega ao abrir a porta.
+                // DTR/RTS off so the CH340 does not reset the Mega when the port opens.
                 DtrEnable = false,
                 RtsEnable = false,
                 NewLine = "\n"
@@ -75,16 +75,16 @@ public class BusManager : IBusManager
 
             serial.Open();
 
-            // Descarta o menu que o firmware possa ter deixado no buffer.
+            // Discard whatever menu the firmware may have left in the buffer.
             Thread.Sleep(50);
             serial.DiscardInBuffer();
 
-            // O firmware lê um único carácter; Enter é ignorado do lado dele.
-            serial.Write(opcao.ToString());
+            // The firmware reads a single character; Enter is ignored on its side.
+            serial.Write(option.ToString());
 
-            var resposta = LerResposta(serial, opcao, timeoutMs);
+            var response = ReadResponse(serial, option, timeoutMs);
             serial.Close();
-            return resposta;
+            return response;
         }
         catch (Exception ex)
         {
@@ -93,40 +93,41 @@ public class BusManager : IBusManager
     }
 
     /// <summary>
-    /// Lê a resposta a um comando. O firmware faz eco do carácter recebido, imprime
-    /// o resultado e volta a mostrar o menu — a moldura do menu marca o fim da resposta.
+    /// Reads the answer to a command. The firmware echoes the character it received,
+    /// prints the result and then shows the menu again — the menu's frame marks the end
+    /// of the answer.
     /// </summary>
-    private static string? LerResposta(SerialPort serial, char opcao, int timeoutMs)
+    private static string? ReadResponse(SerialPort serial, char option, int timeoutMs)
     {
         var sb = new StringBuilder();
         var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs * 2L);
-        var aguardaEco = true;
+        var awaitingEcho = true;
 
         while (DateTime.UtcNow < deadline)
         {
-            string linha;
+            string line;
             try
             {
-                linha = serial.ReadLine().Trim();
+                line = serial.ReadLine().Trim();
             }
             catch (TimeoutException)
             {
                 break;
             }
 
-            if (aguardaEco)
+            if (awaitingEcho)
             {
-                aguardaEco = false;
-                if (linha.Length == 1 && linha[0] == opcao)
+                awaitingEcho = false;
+                if (line.Length == 1 && line[0] == option)
                     continue;
             }
 
-            // Cabeçalho ("====") ou rodapé ("----") do menu reimpresso: resposta terminada.
-            if (linha.StartsWith("====") || linha.StartsWith("----"))
+            // Header ("====") or footer ("----") of the reprinted menu: answer is over.
+            if (line.StartsWith("====") || line.StartsWith("----"))
                 break;
 
-            if (linha.Length > 0)
-                sb.AppendLine(linha);
+            if (line.Length > 0)
+                sb.AppendLine(line);
         }
 
         return sb.Length > 0 ? sb.ToString().Trim() : null;

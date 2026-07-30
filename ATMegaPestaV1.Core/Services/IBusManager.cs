@@ -1,49 +1,49 @@
 namespace ATMegaPestaV1.Services;
 
 /// <summary>
-/// Opções do menu série do firmware Prog_Tester V1.2 (ATMega2560 Pro Mini / MASTER).
-/// A assinatura passou a ser a opção 1 e as restantes deslizaram uma posição.
+/// Options in the serial menu of the Prog_Tester V1.2 firmware (ATMega2560 Pro Mini /
+/// MASTER). The signature became option 1 and the rest shifted down one position.
 /// </summary>
 public static class MenuTester
 {
-    public const char Assinatura       = '1';
-    public const char AtivarUsbAsp     = '2';
-    public const char AtivarMegaMaster = '3';
-    public const char IsolarBarramento = '4';
-    public const char TestarSerial2    = '5';
-    public const char TesteSpi         = '6';
+    public const char Signature        = '1';
+    public const char EnableUsbAsp     = '2';
+    public const char EnableMegaMaster = '3';
+    public const char IsolateBus       = '4';
+    public const char TestSerial2      = '5';
+    public const char SpiTest          = '6';
 
-    /// <summary>Resposta esperada da opção 1 (<c>exibirAssinatura</c>).</summary>
-    public const string AssinaturaEsperada = "ATmega2560_Pro_ON";
+    /// <summary>Expected answer to option 1 (<c>exibirAssinatura</c>).</summary>
+    public const string ExpectedSignature = "ATmega2560_Pro_ON";
 }
 
 /// <summary>
-/// Resultado da leitura da assinatura do equipamento (opção 1 do menu).
+/// Result of reading the rig's signature (menu option 1).
 /// </summary>
-public record AssinaturaResult(bool Valida, string? Assinatura, string? Resposta);
+public record SignatureResult(bool Valid, string? Signature, string? Response);
 
 /// <summary>
-/// Representa o BusManager (firmware master no ATMega2560 Pro Mini via CH340).
-/// Responsável por identificar o equipamento e por comutar o barramento ISP
-/// entre USBAsp e Mega, isolá-lo, ou correr os diagnósticos de Serial2/SPI.
+/// Represents the BusManager (master firmware on the ATMega2560 Pro Mini, over CH340).
+/// Responsible for identifying the rig and for switching the ISP bus between USBAsp and
+/// Mega, isolating it, or running the Serial2/SPI diagnostics.
 /// </summary>
 public interface IBusManager
 {
-    /// <summary>Envia "1" → devolve a assinatura do equipamento, já validada.</summary>
-    Task<AssinaturaResult> VerificarAssinaturaAsync(CancellationToken ct = default);
+    /// <summary>Sends "1" → returns the rig's signature, already validated.</summary>
+    Task<SignatureResult> VerifySignatureAsync(CancellationToken ct = default);
 
-    /// <summary>Envia "2" → activa o USBAsp no barramento ISP (USBASP_SPI).</summary>
+    /// <summary>Sends "2" → puts the USBAsp on the ISP bus (USBASP_SPI).</summary>
     Task<string?> SelectUsbAspAsync(CancellationToken ct = default);
 
-    /// <summary>Envia "3" → comuta o barramento para o ATMega2560 (uC_MASTER_SPI).</summary>
+    /// <summary>Sends "3" → switches the bus over to the ATMega2560 (uC_MASTER_SPI).</summary>
     Task<string?> SwitchToMegaAsync(CancellationToken ct = default);
 
-    /// <summary>Envia "4" → isola totalmente o barramento em Hi-Z (SPI_CANCEL_ACCESS).</summary>
-    Task<string?> IsolarBarramentoAsync(CancellationToken ct = default);
+    /// <summary>Sends "4" → isolates the bus completely into Hi-Z (SPI_CANCEL_ACCESS).</summary>
+    Task<string?> IsolateBusAsync(CancellationToken ct = default);
 
-    /// <summary>Envia "5" → testa a ligação Serial2 ao Nano (TEST_SERIAL2_COM).</summary>
-    Task<string?> TestarSerial2Async(CancellationToken ct = default);
+    /// <summary>Sends "5" → tests the Serial2 link to the Nano (TEST_SERIAL2_COM).</summary>
+    Task<string?> TestSerial2Async(CancellationToken ct = default);
 
-    /// <summary>Envia "6" → executa a sequência completa de teste SPI (SPI_TEST).</summary>
-    Task<string?> ExecutarTesteSpiAsync(CancellationToken ct = default);
+    /// <summary>Sends "6" → runs the full SPI test sequence (SPI_TEST).</summary>
+    Task<string?> RunSpiTestAsync(CancellationToken ct = default);
 }

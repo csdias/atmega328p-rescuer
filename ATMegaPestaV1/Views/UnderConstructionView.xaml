@@ -9,7 +9,7 @@
                        FontSize="48"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,16"/>
-            <TextBlock x:Name="TxtTitulo"
+            <TextBlock x:Name="TxtTitle"
                        Foreground="#CDD6F4" FontSize="22" FontWeight="Bold"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,8"/>

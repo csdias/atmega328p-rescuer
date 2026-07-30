@@ -3,81 +3,84 @@ using System.Globalization;
 namespace ATMegaPestaV1.Services;
 
 /// <summary>
-/// Características fixas de um microcontrolador (definidas pelo silício, não lidas do chip).
+/// Fixed characteristics of a microcontroller (set by the silicon, not read off the chip).
 /// </summary>
-public record McuInfo(string Nome, int FlashBytes, int EepromBytes, int SramBytes);
+public record McuInfo(string Name, int FlashBytes, int EepromBytes, int SramBytes);
 
 /// <summary>
-/// Leitura dos fuse bits traduzida para linguagem humana.
-/// Só descodifica — nunca escreve nada no chip.
+/// A fuse bit reading translated into human language.
+/// Decodes only — never writes anything to the chip.
+///
+/// The description strings stay in Portuguese: they are shown to the student on screen and
+/// written into the backup sheet, so they are content, not code.
 /// </summary>
-public record FusesDecodificados(
-    string Relogio,
-    bool Ckdiv8Activo,
+public record DecodedFuses(
+    string Clock,
+    bool Ckdiv8Enabled,
     string BrownOut,
-    bool SpiActivo,
-    bool ResetActivo,
-    bool EepromPreservada,
+    bool SpiEnabled,
+    bool ResetEnabled,
+    bool EepromPreserved,
     int BootloaderBytes,
-    bool BootRstActivo,
-    int FlashAplicacao,
-    string Bloqueio,
-    bool LeituraLivre)
+    bool BootRstEnabled,
+    int ApplicationFlash,
+    string LockLevel,
+    bool ReadEnabled)
 {
-    public string DescricaoLow => Relogio;
+    public string LowDescription => Clock;
 
-    public string DescricaoHigh => BootRstActivo
-        ? $"bootloader {FormatarBytes(BootloaderBytes)} · reset vector no boot"
+    public string HighDescription => BootRstEnabled
+        ? $"bootloader {FormatBytes(BootloaderBytes)} · reset vector no boot"
         : "sem bootloader · reset vector na aplicação";
 
-    public string DescricaoExtended => $"brown-out {BrownOut}";
+    public string ExtendedDescription => $"brown-out {BrownOut}";
 
-    public string DescricaoLock => Bloqueio;
+    public string LockDescription => LockLevel;
 
-    public static string FormatarBytes(int bytes) =>
+    public static string FormatBytes(int bytes) =>
         bytes >= 1024 ? $"{bytes / 1024} KB" : $"{bytes} B";
 }
 
 /// <summary>
-/// Descodifica os fuse bits do ATmega328P (datasheet, tabelas 8-1/8-3 e 28-5..28-8).
+/// Decodes the ATmega328P fuse bits (datasheet, tables 8-1/8-3 and 28-5..28-8).
 /// </summary>
 public static class FuseDecoder
 {
     /// <summary>
-    /// Tabela de MCUs conhecidos. A app só programa m328p; acrescente aqui se mudar.
+    /// Table of known MCUs. The app only programs m328p; add here if that changes.
     /// </summary>
-    private static readonly Dictionary<string, McuInfo> Conhecidos = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, McuInfo> Known = new(StringComparer.OrdinalIgnoreCase)
     {
         ["ATmega328P"] = new("ATmega328P", 32768, 1024, 2048),
         ["ATmega328"]  = new("ATmega328",  32768, 1024, 2048)
     };
 
-    public static McuInfo PorDefeito => Conhecidos["ATmega328P"];
+    public static McuInfo Default => Known["ATmega328P"];
 
-    public static McuInfo Identificar(string? nomeAvrdude)
+    public static McuInfo Identify(string? avrdudeName)
     {
-        if (string.IsNullOrWhiteSpace(nomeAvrdude))
-            return PorDefeito;
+        if (string.IsNullOrWhiteSpace(avrdudeName))
+            return Default;
 
-        foreach (var (nome, info) in Conhecidos)
-            if (nomeAvrdude.Contains(nome, StringComparison.OrdinalIgnoreCase))
+        foreach (var (name, info) in Known)
+            if (avrdudeName.Contains(name, StringComparison.OrdinalIgnoreCase))
                 return info;
 
-        return PorDefeito;
+        return Default;
     }
 
-    public static FusesDecodificados? Descodificar(FusesResult fuses, McuInfo mcu)
+    public static DecodedFuses? Decode(FusesResult fuses, McuInfo mcu)
     {
         if (!fuses.Success)
             return null;
 
-        if (!TentarHex(fuses.Low, out var lfuse) ||
-            !TentarHex(fuses.High, out var hfuse) ||
-            !TentarHex(fuses.Extended, out var efuse))
+        if (!TryHex(fuses.Low, out var lfuse) ||
+            !TryHex(fuses.High, out var hfuse) ||
+            !TryHex(fuses.Extended, out var efuse))
             return null;
 
-        // O lock byte é opcional — se não vier, não se inventa um valor.
-        int? lockByte = TentarHex(fuses.Lock, out var lb) ? lb : null;
+        // The lock byte is optional — if it does not come, no value is invented.
+        int? lockByte = TryHex(fuses.Lock, out var lb) ? lb : null;
 
         var bootBytes = ((hfuse >> 1) & 0x03) switch
         {
@@ -87,24 +90,24 @@ public static class FuseDecoder
             _ => 4096
         };
 
-        var bootRst = (hfuse & 0x01) == 0;          // activo a zero
+        var bootRst = (hfuse & 0x01) == 0;          // active low
         var flashApp = bootRst ? mcu.FlashBytes - bootBytes : mcu.FlashBytes;
 
-        return new FusesDecodificados(
-            Relogio:          DescreverRelogio(lfuse),
-            Ckdiv8Activo:     (lfuse & 0x80) == 0,  // activo a zero
-            BrownOut:         DescreverBrownOut(efuse),
-            SpiActivo:        (hfuse & 0x20) == 0,  // SPIEN activo a zero
-            ResetActivo:      (hfuse & 0x80) != 0,  // RSTDISBL a 1 = reset normal
-            EepromPreservada: (hfuse & 0x08) == 0,  // EESAVE activo a zero
+        return new DecodedFuses(
+            Clock:            DescribeClock(lfuse),
+            Ckdiv8Enabled:    (lfuse & 0x80) == 0,  // active low
+            BrownOut:         DescribeBrownOut(efuse),
+            SpiEnabled:       (hfuse & 0x20) == 0,  // SPIEN active low
+            ResetEnabled:     (hfuse & 0x80) != 0,  // RSTDISBL at 1 = normal reset
+            EepromPreserved:  (hfuse & 0x08) == 0,  // EESAVE active low
             BootloaderBytes:  bootBytes,
-            BootRstActivo:    bootRst,
-            FlashAplicacao:   flashApp,
-            Bloqueio:         DescreverBloqueio(lockByte),
-            LeituraLivre:     lockByte is null || (lockByte.Value & 0x03) == 0x03);
+            BootRstEnabled:   bootRst,
+            ApplicationFlash: flashApp,
+            LockLevel:        DescribeLock(lockByte),
+            ReadEnabled:      lockByte is null || (lockByte.Value & 0x03) == 0x03);
     }
 
-    private static string DescreverRelogio(int lfuse)
+    private static string DescribeClock(int lfuse)
     {
         var cksel = lfuse & 0x0F;
 
@@ -116,11 +119,11 @@ public static class FuseDecoder
             3 => "RC interno 128 kHz",
             4 or 5 => "cristal 32.768 kHz",
             6 or 7 => "cristal full swing",
-            _ => $"cristal externo {GamaCristal(cksel)}"
+            _ => $"cristal externo {CrystalRange(cksel)}"
         };
     }
 
-    private static string GamaCristal(int cksel) => ((cksel >> 1) & 0x07) switch
+    private static string CrystalRange(int cksel) => ((cksel >> 1) & 0x07) switch
     {
         4 => "0.4–0.9 MHz",
         5 => "0.9–3.0 MHz",
@@ -129,7 +132,7 @@ public static class FuseDecoder
         _ => "gama desconhecida"
     };
 
-    private static string DescreverBrownOut(int efuse) => (efuse & 0x07) switch
+    private static string DescribeBrownOut(int efuse) => (efuse & 0x07) switch
     {
         7 => "desactivado",
         6 => "1.8 V",
@@ -138,7 +141,7 @@ public static class FuseDecoder
         _ => "reservado"
     };
 
-    private static string DescreverBloqueio(int? lockByte)
+    private static string DescribeLock(int? lockByte)
     {
         if (lockByte is null)
             return "não lido";
@@ -152,16 +155,16 @@ public static class FuseDecoder
         };
     }
 
-    private static bool TentarHex(string? valor, out int resultado)
+    private static bool TryHex(string? value, out int result)
     {
-        resultado = 0;
-        if (string.IsNullOrWhiteSpace(valor))
+        result = 0;
+        if (string.IsNullOrWhiteSpace(value))
             return false;
 
-        var limpo = valor.Trim();
-        if (limpo.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
-            limpo = limpo[2..];
+        var cleaned = value.Trim();
+        if (cleaned.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            cleaned = cleaned[2..];
 
-        return int.TryParse(limpo, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out resultado);
+        return int.TryParse(cleaned, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result);
     }
 }

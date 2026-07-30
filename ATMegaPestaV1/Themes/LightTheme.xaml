@@ -1,45 +1,45 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Fundos -->
-    <SolidColorBrush x:Key="BrushFundoJanela"   Color="#F5F5F5"/>
-    <SolidColorBrush x:Key="BrushFundoHeader"   Color="#E0E0E0"/>
-    <SolidColorBrush x:Key="BrushFundoMenu"     Color="#E8E8E8"/>
-    <SolidColorBrush x:Key="BrushFundoCard"     Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="BrushFundoSubCard"  Color="#F0F0F0"/>
-    <SolidColorBrush x:Key="BrushFundoInput"    Color="#EBEBEB"/>
-    <SolidColorBrush x:Key="BrushSeparador"     Color="#CCCCCC"/>
-    <SolidColorBrush x:Key="BrushRealce"        Color="#FFFFFF"/>
+    <!-- Backgrounds -->
+    <SolidColorBrush x:Key="BrushWindowBackground"   Color="#F5F5F5"/>
+    <SolidColorBrush x:Key="BrushHeaderBackground"   Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="BrushMenuBackground"     Color="#E8E8E8"/>
+    <SolidColorBrush x:Key="BrushCardBackground"     Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BrushSubCardBackground"  Color="#F0F0F0"/>
+    <SolidColorBrush x:Key="BrushInputBackground"    Color="#EBEBEB"/>
+    <SolidColorBrush x:Key="BrushSeparator"     Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="BrushHighlight"        Color="#FFFFFF"/>
 
-    <!-- Relevo: aqui é plano — a moldura é uma linha e mais nada. Os dois nomes
-         sobrevivem porque as vistas distinguem os dois lados do bisel. -->
-    <SolidColorBrush x:Key="BrushRelevoAfundado" Color="#CCCCCC"/>
-    <SolidColorBrush x:Key="BrushRelevoElevado"  Color="#CCCCCC"/>
+    <!-- Bevel: flat here — the frame is a line and nothing more. Both names survive
+         because the views distinguish the two sides of the bevel. -->
+    <SolidColorBrush x:Key="BrushBevelSunken" Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="BrushBevelRaised"  Color="#CCCCCC"/>
 
-    <!-- Texto -->
-    <SolidColorBrush x:Key="BrushTextoTitulo"   Color="#1A1A1A"/>
-    <SolidColorBrush x:Key="BrushTextoNormal"   Color="#444444"/>
-    <SolidColorBrush x:Key="BrushTextoSubtil"   Color="#888888"/>
-    <SolidColorBrush x:Key="BrushTextoDesativ"  Color="#BBBBBB"/>
+    <!-- Text -->
+    <SolidColorBrush x:Key="BrushTextTitle"   Color="#1A1A1A"/>
+    <SolidColorBrush x:Key="BrushTextNormal"   Color="#444444"/>
+    <SolidColorBrush x:Key="BrushTextSubtle"   Color="#888888"/>
+    <SolidColorBrush x:Key="BrushTextDisabled"  Color="#BBBBBB"/>
 
-    <!-- Accento -->
-    <SolidColorBrush x:Key="BrushMenuAccento"   Color="#555555"/>
+    <!-- Accent -->
+    <SolidColorBrush x:Key="BrushMenuAccent"   Color="#555555"/>
 
-    <!-- Botão Claro (PrimaryButton) -->
-    <SolidColorBrush x:Key="BrushBtnClaro"      Color="#1A1A1A"/>
-    <SolidColorBrush x:Key="BrushBtnClaroHover" Color="#333333"/>
-    <SolidColorBrush x:Key="BrushBtnClaroText"  Color="#FFFFFF"/>
+    <!-- Light button (PrimaryButton) -->
+    <SolidColorBrush x:Key="BrushBtnLight"      Color="#1A1A1A"/>
+    <SolidColorBrush x:Key="BrushBtnLightHover" Color="#333333"/>
+    <SolidColorBrush x:Key="BrushBtnLightText"  Color="#FFFFFF"/>
 
-    <!-- Botão Escuro (DarkButton) -->
-    <SolidColorBrush x:Key="BrushBtnEscuro"     Color="#DDDDDD"/>
-    <SolidColorBrush x:Key="BrushBtnEscuroHover" Color="#CCCCCC"/>
-    <SolidColorBrush x:Key="BrushBtnEscuroText" Color="#1A1A1A"/>
+    <!-- Dark button (DarkButton) -->
+    <SolidColorBrush x:Key="BrushBtnDark"     Color="#DDDDDD"/>
+    <SolidColorBrush x:Key="BrushBtnDarkHover" Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="BrushBtnDarkText" Color="#1A1A1A"/>
 
-    <!-- Botão Desactivado -->
-    <SolidColorBrush x:Key="BrushBtnDesativ"    Color="#CCCCCC"/>
-    <SolidColorBrush x:Key="BrushBtnDesativText" Color="#999999"/>
+    <!-- Disabled button -->
+    <SolidColorBrush x:Key="BrushBtnDisabled"    Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="BrushBtnDisabledText" Color="#999999"/>
 
-    <!-- Pinos -->
+    <!-- Pins -->
     <SolidColorBrush x:Key="BrushPin"           Color="#DDDDDD"/>
     <SolidColorBrush x:Key="BrushPinText"       Color="#1A1A1A"/>
 
@@ -51,34 +51,34 @@
     <SolidColorBrush x:Key="BrushBadge"         Color="#6B7280"/>
     <SolidColorBrush x:Key="BrushBadgeText"     Color="#FFFFFF"/>
 
-    <!-- Progresso -->
-    <SolidColorBrush x:Key="BrushProgressoBg"   Color="#DDDDDD"/>
-    <SolidColorBrush x:Key="BrushProgressoBar"  Color="#1A1A1A"/>
-    <SolidColorBrush x:Key="BrushProgressoText" Color="#1A1A1A"/>
+    <!-- Progress -->
+    <SolidColorBrush x:Key="BrushProgressBg"   Color="#DDDDDD"/>
+    <SolidColorBrush x:Key="BrushProgressBar"  Color="#1A1A1A"/>
+    <SolidColorBrush x:Key="BrushProgressText" Color="#1A1A1A"/>
 
-    <!-- Semântico: estados -->
-    <SolidColorBrush x:Key="BrushErro"          Color="#D9222B"/>
-    <SolidColorBrush x:Key="BrushErroText"      Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="BrushSucesso"       Color="#2D7A4F"/>
-    <SolidColorBrush x:Key="BrushSucessoText"   Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="BrushAviso"         Color="#D97706"/>
-    <SolidColorBrush x:Key="BrushAvisoText"     Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="BrushPinErro"       Color="#D9222B"/>
-    <SolidColorBrush x:Key="BrushPinSucesso"    Color="#2D7A4F"/>
-    <SolidColorBrush x:Key="BrushPinAviso"      Color="#D97706"/>
-    <SolidColorBrush x:Key="BrushPinInactivo"   Color="#CCCCCC"/>
+    <!-- Semantic: states -->
+    <SolidColorBrush x:Key="BrushError"          Color="#D9222B"/>
+    <SolidColorBrush x:Key="BrushErrorText"      Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BrushSuccess"       Color="#2D7A4F"/>
+    <SolidColorBrush x:Key="BrushSuccessText"   Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BrushWarning"         Color="#D97706"/>
+    <SolidColorBrush x:Key="BrushWarningText"     Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BrushPinError"       Color="#D9222B"/>
+    <SolidColorBrush x:Key="BrushPinSuccess"    Color="#2D7A4F"/>
+    <SolidColorBrush x:Key="BrushPinWarning"      Color="#D97706"/>
+    <SolidColorBrush x:Key="BrushPinIdle"   Color="#CCCCCC"/>
 
-    <!-- Geometria e tipografia. Os nomes são por peso, não por sítio, para uma
-         medida servir vários controlos. -->
-    <FontFamily x:Key="FonteUI">Segoe UI</FontFamily>
-    <Thickness  x:Key="EspessuraBotao">0</Thickness>
-    <Thickness  x:Key="EspessuraCartao">0</Thickness>
-    <CornerRadius x:Key="RaioTenue">2</CornerRadius>
-    <CornerRadius x:Key="RaioPequeno">4</CornerRadius>
-    <CornerRadius x:Key="RaioMedio">6</CornerRadius>
-    <CornerRadius x:Key="RaioGrande">8</CornerRadius>
-    <CornerRadius x:Key="RaioEnorme">12</CornerRadius>
-    <CornerRadius x:Key="RaioPilula">11</CornerRadius>
-    <CornerRadius x:Key="RaioTopo">8,8,0,0</CornerRadius>
+    <!-- Geometry and typography. The names go by weight, not by place, so one
+         measurement can serve several controls. -->
+    <FontFamily x:Key="FontUI">Segoe UI</FontFamily>
+    <Thickness  x:Key="ButtonThickness">0</Thickness>
+    <Thickness  x:Key="CardThickness">0</Thickness>
+    <CornerRadius x:Key="RadiusTiny">2</CornerRadius>
+    <CornerRadius x:Key="RadiusSmall">4</CornerRadius>
+    <CornerRadius x:Key="RadiusMedium">6</CornerRadius>
+    <CornerRadius x:Key="RadiusLarge">8</CornerRadius>
+    <CornerRadius x:Key="RadiusHuge">12</CornerRadius>
+    <CornerRadius x:Key="RadiusPill">11</CornerRadius>
+    <CornerRadius x:Key="RadiusTop">8,8,0,0</CornerRadius>
 
 </ResourceDictionary>

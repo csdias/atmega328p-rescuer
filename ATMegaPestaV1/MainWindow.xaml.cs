@@ -10,255 +10,255 @@ namespace ATMegaPestaV1;
 
 public partial class MainWindow : Window
 {
-    private readonly IServiceFactory _servicos;
+    private readonly IServiceFactory _services;
     private readonly IDeviceDetector _detector;
-    private readonly int _maxTentativas;
-    private readonly bool _verificarAssinatura;
-    private int _tentativaActual;
-    private bool _verificacaoConcluida;
-    private bool _aguardarTecla;
-    private string? _portaCom;
-    private DispatcherTimer? _relogio;
+    private readonly int _maxAttempts;
+    private readonly bool _verifySignature;
+    private int _currentAttempt;
+    private bool _verificationDone;
+    private bool _awaitingKey;
+    private string? _comPort;
+    private DispatcherTimer? _clock;
 
-    private static readonly Brush CorVerde = new SolidColorBrush(Color.FromRgb(0xA6, 0xE3, 0xA1));
-    private static readonly Brush CorVermelha = new SolidColorBrush(Color.FromRgb(0xF3, 0x8B, 0xA8));
+    private static readonly Brush GreenColour = new SolidColorBrush(Color.FromRgb(0xA6, 0xE3, 0xA1));
+    private static readonly Brush RedColour = new SolidColorBrush(Color.FromRgb(0xF3, 0x8B, 0xA8));
 
     public MainWindow()
     {
-        // Antes do InitializeComponent: o XAML marca o MenuTestes com IsChecked="True",
-        // o que dispara MenuItem_Checked ainda dentro da construção da janela. O que
-        // esse handler precisar tem de já cá estar.
+        // Before InitializeComponent: the XAML marks MenuTests with IsChecked="True",
+        // which fires MenuItem_Checked while the window is still being constructed.
+        // Whatever that handler needs has to already be here.
         var config = new ConfigurationBuilder()
             .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false)
             .Build();
 
-        _maxTentativas = config.GetValue<int>("MaxTentativas");
-        if (_maxTentativas <= 0)
-            _maxTentativas = 3;
+        _maxAttempts = config.GetValue<int>("MaxAttempts");
+        if (_maxAttempts <= 0)
+            _maxAttempts = 3;
 
-        // A assinatura é a opção 1 do menu do firmware (Prog_Tester V1.2). Equipamentos
-        // com firmware antigo não respondem — daí a possibilidade de desligar a verificação.
-        _verificarAssinatura = config.GetValue("VerificarAssinatura", true);
+        // The signature is option 1 of the firmware menu (Prog_Tester V1.2). Rigs with
+        // older firmware do not answer — hence the option to turn the check off.
+        _verifySignature = config.GetValue("VerifySignature", true);
 
-        // A construção dos serviços fica toda aqui: daqui para baixo esta janela só
-        // conhece interfaces.
-        _servicos = ServiceFactory.APartirDe(config);
-        _detector = _servicos.CriarDetector();
+        // Service construction all lives here: from here down this window only knows
+        // interfaces.
+        _services = ServiceFactory.From(config);
+        _detector = _services.CreateDetector();
 
         InitializeComponent();
     }
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
-        await ExecutarVerificacaoAsync();
+        await RunVerificationAsync();
     }
 
-    private async void BtnVerificar_Click(object sender, RoutedEventArgs e)
+    private async void BtnVerify_Click(object sender, RoutedEventArgs e)
     {
-        await ExecutarVerificacaoAsync();
+        await RunVerificationAsync();
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        if (_aguardarTecla)
+        if (_awaitingKey)
             Application.Current.Shutdown();
     }
 
-    private bool _verificacaoEmCurso;
+    private bool _verificationRunning;
 
-    private async Task ExecutarVerificacaoAsync()
+    private async Task RunVerificationAsync()
     {
-        if (_verificacaoConcluida || _aguardarTecla || _verificacaoEmCurso)
+        if (_verificationDone || _awaitingKey || _verificationRunning)
             return;
 
-        _verificacaoEmCurso = true;
-        BtnVerificar.IsEnabled = false;
-        _tentativaActual++;
+        _verificationRunning = true;
+        BtnVerify.IsEnabled = false;
+        _currentAttempt++;
 
-        TxtMensagem.Foreground = new SolidColorBrush(Color.FromRgb(0xCD, 0xD6, 0xF4));
-        TxtMensagem.Text = "A verificar dispositivos...";
+        TxtMessage.Foreground = new SolidColorBrush(Color.FromRgb(0xCD, 0xD6, 0xF4));
+        TxtMessage.Text = "A verificar dispositivos...";
 
-        var dispositivos = await _detector.DetectarAsync();
+        var devices = await _detector.DetectAsync();
 
-        ActualizarEstadoCH340(dispositivos.PortaCH340);
-        ActualizarEstadoUSBAsp(dispositivos.UsbAspLigado);
+        UpdateCh340State(devices.Ch340Port);
+        UpdateUsbAspState(devices.UsbAspConnected);
 
-        var signatureValida = await VerificarAssinaturaAsync(dispositivos.PortaCH340);
+        var signatureValid = await VerifySignatureAsync(devices.Ch340Port);
 
-        if (dispositivos.Completa && signatureValida)
+        if (devices.Complete && signatureValid)
         {
-            _verificacaoConcluida = true;
-            _portaCom = dispositivos.PortaCH340;
-            MostrarPainelPrincipal();
-            _verificacaoEmCurso = false;
+            _verificationDone = true;
+            _comPort = devices.Ch340Port;
+            ShowMainPanel();
+            _verificationRunning = false;
             return;
         }
 
-        if (_tentativaActual >= _maxTentativas)
+        if (_currentAttempt >= _maxAttempts)
         {
-            _aguardarTecla = true;
-            TxtMensagem.Foreground = CorVermelha;
-            TxtMensagem.Text = "Não foi possível detectar todos os dispositivos após várias tentativas.\n" +
-                               "Por favor, contacte a assistência técnica.";
-            TxtTentativas.Text = "";
-            TxtRodape.Foreground = new SolidColorBrush(Color.FromRgb(0xCD, 0xD6, 0xF4));
-            TxtRodape.Text = "Pressione qualquer tecla para terminar a aplicação.";
+            _awaitingKey = true;
+            TxtMessage.Foreground = RedColour;
+            TxtMessage.Text = "Não foi possível detectar todos os dispositivos após várias tentativas.\n" +
+                              "Por favor, contacte a assistência técnica.";
+            TxtAttempts.Text = "";
+            TxtFooter.Foreground = new SolidColorBrush(Color.FromRgb(0xCD, 0xD6, 0xF4));
+            TxtFooter.Text = "Pressione qualquer tecla para terminar a aplicação.";
             Focus();
-            _verificacaoEmCurso = false;
+            _verificationRunning = false;
             return;
         }
 
-        var tentativasRestantes = _maxTentativas - _tentativaActual;
-        TxtTentativas.Text = $"Tentativa {_tentativaActual} de {_maxTentativas}";
-        TxtMensagem.Foreground = new SolidColorBrush(Color.FromRgb(0xFA, 0xB3, 0x87));
-        TxtMensagem.Text = "Dispositivo(s) em falta. Por favor, ligue o(s) dispositivo(s) e pressione o botão novamente.";
-        BtnVerificar.Content = $"Tentar Novamente ({tentativasRestantes} restante{(tentativasRestantes != 1 ? "s" : "")})";
-        BtnVerificar.IsEnabled = true;
-        _verificacaoEmCurso = false;
+        var attemptsLeft = _maxAttempts - _currentAttempt;
+        TxtAttempts.Text = $"Tentativa {_currentAttempt} de {_maxAttempts}";
+        TxtMessage.Foreground = new SolidColorBrush(Color.FromRgb(0xFA, 0xB3, 0x87));
+        TxtMessage.Text = "Dispositivo(s) em falta. Por favor, ligue o(s) dispositivo(s) e pressione o botão novamente.";
+        BtnVerify.Content = $"Tentar Novamente ({attemptsLeft} restante{(attemptsLeft != 1 ? "s" : "")})";
+        BtnVerify.IsEnabled = true;
+        _verificationRunning = false;
     }
 
-    private void MostrarPainelPrincipal()
+    private void ShowMainPanel()
     {
-        PanelVerificacao.Visibility = Visibility.Collapsed;
-        PanelPrincipal.Visibility = Visibility.Visible;
+        VerificationPanel.Visibility = Visibility.Collapsed;
+        MainPanel.Visibility = Visibility.Visible;
 
-        ActualizarRelogio();
-        _relogio = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _relogio.Tick += (_, _) => ActualizarRelogio();
-        _relogio.Start();
+        UpdateClock();
+        _clock = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _clock.Tick += (_, _) => UpdateClock();
+        _clock.Start();
 
-        NavegarPara("Testes");
+        NavigateTo("Tests");
     }
 
-    private void ActualizarRelogio()
+    private void UpdateClock()
     {
-        TxtHeaderDataHora.Text = DateTime.Now.ToString("dd/MM/yyyy  HH:mm:ss");
+        TxtHeaderDateTime.Text = DateTime.Now.ToString("dd/MM/yyyy  HH:mm:ss");
     }
 
     /// <summary>
-    /// Abre o módulo de alta tensão a partir de outro ecrã. Marcar o item do menu
-    /// (em vez de chamar NavegarPara directamente) mantém o menu lateral em
-    /// sincronia com o que está a ser mostrado.
+    /// Opens the high-voltage module from another screen. Checking the menu item (rather
+    /// than calling NavigateTo directly) keeps the side menu in sync with what is being
+    /// shown.
     /// </summary>
-    public void AbrirProgramacaoAltaTensao()
+    public void OpenHighVoltageProgramming()
     {
-        MenuProgramacao.IsChecked = true;
+        MenuProgramming.IsChecked = true;
     }
 
     private void MenuItem_Checked(object sender, RoutedEventArgs e)
     {
-        if (ConteudoPrincipal is null)
+        if (MainContent is null)
             return;
 
-        // O IsChecked="True" do MenuTestes dispara isto durante o InitializeComponent,
-        // com o ecrã de verificação ainda por correr: sem porta série detectada, a vista
-        // que daí saísse ficava agarrada a um barramento que não existe. Quem manda
-        // navegar para os testes é o MostrarPainelPrincipal, depois da verificação passar.
-        if (!_verificacaoConcluida)
+        // MenuTests' IsChecked="True" fires this during InitializeComponent, with the
+        // verification screen still to run: with no serial port detected, the view that
+        // came out of it would be stuck to a bus that does not exist. What orders the
+        // navigation to the tests is ShowMainPanel, after verification passes.
+        if (!_verificationDone)
             return;
 
-        if (sender == MenuTestes)
-            NavegarPara("Testes");
-        else if (sender == MenuProgramacao)
-            NavegarPara("Programacao");
-        else if (sender == MenuConfiguracoes)
-            NavegarPara("Configuracoes");
+        if (sender == MenuTests)
+            NavigateTo("Tests");
+        else if (sender == MenuProgramming)
+            NavigateTo("Programming");
+        else if (sender == MenuSettings)
+            NavigateTo("Settings");
     }
 
-    private void NavegarPara(string modulo)
+    private void NavigateTo(string module)
     {
-        var busManager = _servicos.CriarBusManager(_portaCom ?? "");
-        var usbAspService = _servicos.CriarUsbAspService();
+        var busManager = _services.CreateBusManager(_comPort ?? "");
+        var usbAspService = _services.CreateUsbAspService();
 
-        ConteudoPrincipal.Content = modulo switch
+        MainContent.Content = module switch
         {
-            "Testes" => new TesteFuncionalidadesView(busManager, usbAspService),
-            "Programacao" => new UnderConstructionView("Programação de Alta Tensão"),
-            "Configuracoes" => new UnderConstructionView("Configurações"),
+            "Tests" => new FunctionalTestsView(busManager, usbAspService),
+            "Programming" => new UnderConstructionView("Programação de Alta Tensão"),
+            "Settings" => new UnderConstructionView("Configurações"),
             _ => null
         };
     }
 
-    private void ActualizarEstadoCH340(string? porta)
+    private void UpdateCh340State(string? port)
     {
-        if (porta is not null)
+        if (port is not null)
         {
-            LedCH340.Fill = CorVerde;
-            TxtCH340Detail.Text = $"Conectado na porta {porta}";
+            LedCH340.Fill = GreenColour;
+            TxtCH340Detail.Text = $"Conectado na porta {port}";
         }
         else
         {
-            LedCH340.Fill = CorVermelha;
+            LedCH340.Fill = RedColour;
             TxtCH340Detail.Text = "Não detectado — Ligue o conversor USB-Serial CH340";
         }
     }
 
-    private void ActualizarEstadoUSBAsp(bool encontrado)
+    private void UpdateUsbAspState(bool found)
     {
-        if (encontrado)
+        if (found)
         {
-            LedUSBAsp.Fill = CorVerde;
+            LedUSBAsp.Fill = GreenColour;
             TxtUSBaspDetail.Text = "Conectado";
         }
         else
         {
-            LedUSBAsp.Fill = CorVermelha;
+            LedUSBAsp.Fill = RedColour;
             TxtUSBaspDetail.Text = "Não detectado — Ligue o programador USBAsp";
         }
     }
 
     /// <summary>
-    /// Pede a assinatura ao equipamento (opção 1 do menu) e actualiza o LED respectivo.
+    /// Asks the rig for its signature (menu option 1) and updates the matching LED.
     /// </summary>
-    private async Task<bool> VerificarAssinaturaAsync(string? porta)
+    private async Task<bool> VerifySignatureAsync(string? port)
     {
-        if (!_verificarAssinatura)
+        if (!_verifySignature)
         {
-            ActualizarEstadoSignatureIgnorada();
+            UpdateSignatureStateSkipped();
             return true;
         }
 
-        if (porta is null)
+        if (port is null)
         {
-            ActualizarEstadoSignature(null, null);
+            UpdateSignatureState(null, null);
             return false;
         }
 
-        TxtMensagem.Text = "A verificar a assinatura do equipamento...";
+        TxtMessage.Text = "A verificar a assinatura do equipamento...";
 
-        var resultado = await _servicos.CriarBusManager(porta).VerificarAssinaturaAsync();
-        ActualizarEstadoSignature(porta, resultado);
-        return resultado.Valida;
+        var result = await _services.CreateBusManager(port).VerifySignatureAsync();
+        UpdateSignatureState(port, result);
+        return result.Valid;
     }
 
-    private void ActualizarEstadoSignature(string? porta, AssinaturaResult? resultado)
+    private void UpdateSignatureState(string? port, SignatureResult? result)
     {
-        if (porta is null || resultado is null)
+        if (port is null || result is null)
         {
             LedSignature.Fill = new SolidColorBrush(Color.FromRgb(0x6C, 0x70, 0x86));
             TxtSignatureDetail.Text = "A aguardar detecção do CH340...";
             return;
         }
 
-        if (resultado.Valida)
+        if (result.Valid)
         {
-            LedSignature.Fill = CorVerde;
-            TxtSignatureDetail.Text = $"Equipamento identificado: {resultado.Assinatura} na porta {porta}";
+            LedSignature.Fill = GreenColour;
+            TxtSignatureDetail.Text = $"Equipamento identificado: {result.Signature} na porta {port}";
         }
         else
         {
-            LedSignature.Fill = CorVermelha;
-            TxtSignatureDetail.Text = resultado.Resposta is { Length: > 0 } resposta
-                ? $"Assinatura inesperada em {porta} — recebido: {PrimeiraLinha(resposta)}"
-                : $"Sem resposta do equipamento em {porta} — Verifique a ligação";
+            LedSignature.Fill = RedColour;
+            TxtSignatureDetail.Text = result.Response is { Length: > 0 } response
+                ? $"Assinatura inesperada em {port} — recebido: {FirstLine(response)}"
+                : $"Sem resposta do equipamento em {port} — Verifique a ligação";
         }
     }
 
-    private static string PrimeiraLinha(string texto) =>
-        texto.Split('\n')[0].Trim();
+    private static string FirstLine(string text) =>
+        text.Split('\n')[0].Trim();
 
-    private void ActualizarEstadoSignatureIgnorada()
+    private void UpdateSignatureStateSkipped()
     {
         LedSignature.Fill = new SolidColorBrush(Color.FromRgb(0x6C, 0x70, 0x86));
         TxtSignatureDetail.Text = "Verificação de assinatura ignorada";

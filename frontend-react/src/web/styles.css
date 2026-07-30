@@ -1,0 +1,679 @@
+/*
+  The values come from frontend-shared/src/tokens.ts, which in turn comes from the WPF's
+  LightTheme.xaml. Here only the custom properties are declared, plus what is specific to
+  the web (grid, focus, scroll) — the palette is not decided in this file.
+*/
+:root {
+  --bg-janela: #f5f5f5;
+  --bg-header: #e0e0e0;
+  --bg-menu: #e8e8e8;
+  --bg-card: #ffffff;
+  --bg-subcard: #f0f0f0;
+  --bg-input: #ebebeb;
+  --separator: #cccccc;
+
+  --text-title: #1a1a1a;
+  --text-normal: #444444;
+  --text-subtle: #888888;
+  --text-disabled: #bbbbbb;
+
+  --menu-accent: #555555;
+
+  --btn-dark: #1a1a1a;
+  --btn-dark-hover: #333333;
+  --btn-dark-text: #ffffff;
+  --btn-light: #dddddd;
+  --btn-light-hover: #cccccc;
+  --btn-light-text: #1a1a1a;
+  --btn-disabled: #cccccc;
+  --btn-disabled-text: #999999;
+
+  --pin: #dddddd;
+  --tag: #e2e2e2;
+  --tag-text: #333333;
+  --badge: #6b7280;
+  --badge-text: #ffffff;
+
+  --progress-bg: #dddddd;
+  --progress-bar: #1a1a1a;
+
+  --error: #d9222b;
+  --success: #2d7a4f;
+  --notice: #d97706;
+  --idle: #cccccc;
+
+  --radius-tiny: 2px;
+  --radius-small: 4px;
+  --radius-medium: 6px;
+  --radius-large: 8px;
+  --radius-huge: 12px;
+
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Cascadia Mono', 'Consolas', ui-monospace, monospace;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg-janela);
+  color: var(--text-normal);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* The keyboard has to be able to walk the bench — the mouse is not the only way. */
+:focus-visible {
+  outline: 2px solid var(--text-title);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Estrutura ─────────────────────────────────────────────────────────── */
+
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.header {
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--separator);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.header__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-title);
+}
+
+.header__sub {
+  font-size: 11px;
+  color: var(--text-subtle);
+}
+
+.header__clock {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-title);
+  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  min-height: 0;
+}
+
+/* In a narrow window the menu becomes a row above the content. */
+@media (max-width: 720px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.menu {
+  background: var(--bg-menu);
+  border-right: 1px solid var(--separator);
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+@media (max-width: 720px) {
+  .menu {
+    flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid var(--separator);
+    overflow-x: auto;
+  }
+}
+
+.menu__item {
+  appearance: none;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 9px 12px;
+  border-radius: var(--radius-small);
+  font: inherit;
+  color: var(--text-normal);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.menu__item:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.menu__item[aria-current='page'] {
+  background: var(--bg-card);
+  color: var(--text-title);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--menu-accent);
+}
+
+.menu__item:disabled {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+.content {
+  padding: 20px;
+  min-width: 0;
+}
+
+/* ── Cards ─────────────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-large);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.card__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-title);
+}
+
+.card__description {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-normal);
+}
+
+.subcard {
+  background: var(--bg-subcard);
+  border-radius: var(--radius-medium);
+  padding: 14px 16px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── LED ───────────────────────────────────────────────────────────────── */
+
+.led {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--idle);
+}
+
+.led--ok {
+  background: var(--success);
+}
+.led--notice {
+  background: var(--notice);
+}
+.led--error {
+  background: var(--error);
+}
+
+.indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+}
+
+.indicator__name {
+  font-weight: 600;
+  color: var(--text-title);
+  min-width: 92px;
+}
+
+.indicator__detail {
+  font-size: 12px;
+  color: var(--text-normal);
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+
+.button {
+  appearance: none;
+  border: none;
+  border-radius: var(--radius-small);
+  padding: 10px 18px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--btn-light);
+  color: var(--btn-light-text);
+  transition: background 0.12s ease;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--btn-light-hover);
+}
+
+.button--primary {
+  background: var(--btn-dark);
+  color: var(--btn-dark-text);
+}
+
+.button--primary:hover:not(:disabled) {
+  background: var(--btn-dark-hover);
+}
+
+.button:disabled {
+  background: var(--btn-disabled);
+  color: var(--btn-disabled-text);
+  cursor: not-allowed;
+}
+
+/* ── Texto de estado ───────────────────────────────────────────────────── */
+
+.status {
+  font-size: 12px;
+}
+.status--ok {
+  color: var(--success);
+}
+.status--notice {
+  color: var(--notice);
+}
+.status--error {
+  color: var(--error);
+}
+.status--idle {
+  color: var(--text-normal);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.subtle {
+  color: var(--text-subtle);
+  font-size: 11px;
+}
+
+/* ── Fichas de dados (MCU, fuses) ──────────────────────────────────────── */
+
+.data {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.datum__label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-subtle);
+}
+
+.datum__value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-title);
+}
+
+.fuses {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.fuse {
+  background: var(--bg-input);
+  border-radius: var(--radius-small);
+  padding: 10px 12px;
+}
+
+.fuse__name {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-subtle);
+}
+
+.fuse__value {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-title);
+}
+
+.fuse__meaning {
+  font-size: 11px;
+  color: var(--text-normal);
+  margin-top: 2px;
+}
+
+.properties {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 2px 16px;
+  margin: 0;
+}
+
+.property {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--separator);
+  font-size: 12px;
+}
+
+.property__name {
+  color: var(--text-normal);
+}
+
+.property__value {
+  color: var(--text-title);
+  font-weight: 600;
+  text-align: right;
+}
+
+/* ── Mapa da Flash ─────────────────────────────────────────────────────── */
+
+.flash-map__bar {
+  display: flex;
+  height: 24px;
+  border-radius: var(--radius-small);
+  overflow: hidden;
+  background: var(--progress-bg);
+}
+
+.flash-map__slice {
+  height: 100%;
+}
+
+.flash-map__slice--application {
+  background: var(--success);
+}
+
+.flash-map__slice--bootloader {
+  background: var(--badge);
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-normal);
+}
+
+.legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-tiny);
+}
+
+/* ── Mapa de pinos ─────────────────────────────────────────────────────── */
+
+.pins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.pin {
+  background: var(--pin);
+  color: var(--text-title);
+  border-radius: var(--radius-small);
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  min-width: 34px;
+  text-align: center;
+}
+
+.tags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: var(--tag);
+  color: var(--tag-text);
+  border-radius: var(--radius-small);
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* ── Tabela de testes ──────────────────────────────────────────────────── */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.table th {
+  text-align: left;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-subtle);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--separator);
+}
+
+.table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--separator);
+  color: var(--text-title);
+}
+
+.table td:last-child,
+.table th:last-child {
+  text-align: right;
+}
+
+.badge {
+  display: inline-block;
+  background: var(--badge);
+  color: var(--badge-text);
+  border-radius: var(--radius-small);
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.badge--passed {
+  background: var(--success);
+}
+.badge--failed {
+  background: var(--error);
+}
+
+.progress {
+  height: 8px;
+  background: var(--progress-bg);
+  border-radius: var(--radius-pill, 11px);
+  overflow: hidden;
+}
+
+.progress__bar {
+  height: 100%;
+  background: var(--progress-bar);
+}
+
+/* ── Notices and output blocks ─────────────────────────────────────────── */
+
+.notice {
+  border-left: 3px solid var(--notice);
+  background: var(--bg-subcard);
+  border-radius: var(--radius-small);
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--text-normal);
+}
+
+.notice--error {
+  border-left-color: var(--error);
+}
+
+.output {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--bg-input);
+  border-radius: var(--radius-small);
+  padding: 10px 12px;
+  margin: 0;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text-normal);
+}
+
+details > summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-title);
+}
+
+/* ── Dialogs ───────────────────────────────────────────────────────────── */
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.dialog {
+  border: none;
+  border-radius: var(--radius-huge);
+  background: var(--bg-card);
+  color: var(--text-normal);
+  padding: 22px 24px;
+  max-width: min(560px, calc(100vw - 32px));
+  font-family: var(--font);
+  font-size: 13px;
+}
+
+.dialog__title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-title);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dialog__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+/* ── Inserir chip ──────────────────────────────────────────────────────── */
+
+.zif {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .zif {
+    grid-template-columns: 1fr;
+  }
+}
+
+.zif__box {
+  background: var(--bg-subcard);
+  border-radius: var(--radius-medium);
+  padding: 22px 16px;
+  font-size: 12px;
+}
+
+.zif__arrow {
+  font-size: 20px;
+  color: var(--menu-accent);
+  animation: zif-seta 1.4s ease-in-out infinite;
+}
+
+@keyframes zif-seta {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(6px);
+  }
+}
+
+.files {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.files a {
+  color: var(--text-title);
+  font-family: var(--font-mono);
+}

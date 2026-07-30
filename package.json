@@ -2,7 +2,7 @@
   "name": "atmegapesta-frontends",
   "private": true,
   "version": "1.0.0",
-  "description": "Front ends da bancada ATMegaPesta V1: web (React) e telemóvel (React Native), sobre lógica partilhada.",
+  "description": "ATMegaPesta V1 bench front ends: web (React) and phone (React Native), over shared logic.",
   "workspaces": [
     "frontend-shared",
     "frontend-react",
@@ -10,9 +10,17 @@
   ],
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
     "dev:web": "npm run dev -w frontend-react",
     "build:web": "npm run build -w frontend-react",
     "start:mobile": "npm run start -w frontend-mobile",
     "android": "npm run android -w frontend-mobile"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^17.8.0",
+    "typescript-eslint": "^8.65.0"
   }
 }

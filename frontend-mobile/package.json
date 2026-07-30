@@ -2,7 +2,7 @@
   "name": "frontend-mobile",
   "private": true,
   "version": "1.0.0",
-  "description": "App Android da bancada ATMegaPesta V1, em React Native. A lógica vem de @atmegapesta/partilhado.",
+  "description": "App Android da bancada ATMegaPesta V1, em React Native. A lógica vem de @atmegapesta/shared.",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@atmegapesta/partilhado": "*",
+    "@atmegapesta/shared": "*",
     "@microsoft/signalr": "^9.0.6",
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~57.0.9",

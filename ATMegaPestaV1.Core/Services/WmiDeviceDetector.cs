@@ -4,18 +4,18 @@ using System.Text.RegularExpressions;
 namespace ATMegaPestaV1.Services;
 
 /// <summary>
-/// Detecção real, por WMI, sobre os dispositivos PnP enumerados pelo Windows.
+/// Real detection, over WMI, against the PnP devices Windows enumerates.
 ///
-/// Falhas de WMI não são propagadas: uma consulta que rebenta é indistinguível, para quem
-/// está à bancada, de um dispositivo que não está ligado — e o ecrã de verificação já diz
-/// o que fazer nesse caso.
+/// WMI failures are not propagated: a query that blows up is indistinguishable, to whoever
+/// is standing at the rig, from a device that is not plugged in — and the verification
+/// screen already says what to do in that case.
 /// </summary>
 public class WmiDeviceDetector : IDeviceDetector
 {
-    public Task<DispositivosDetectados> DetectarAsync(CancellationToken ct = default) =>
-        Task.Run(() => new DispositivosDetectados(DetectarCH340(), DetectarUsbAsp()), ct);
+    public Task<DetectedDevices> DetectAsync(CancellationToken ct = default) =>
+        Task.Run(() => new DetectedDevices(DetectCh340(), DetectUsbAsp()), ct);
 
-    private static string? DetectarCH340()
+    private static string? DetectCh340()
     {
         try
         {
@@ -37,7 +37,7 @@ public class WmiDeviceDetector : IDeviceDetector
         return null;
     }
 
-    private static bool DetectarUsbAsp()
+    private static bool DetectUsbAsp()
     {
         try
         {

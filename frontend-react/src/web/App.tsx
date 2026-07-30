@@ -1,71 +1,71 @@
 import { useEffect, useState } from 'react';
-import { usarBancada } from '@atmegapesta/partilhado';
-import { EcranEmConstrucao } from './ecrans/EcranEmConstrucao';
-import { EcranInserirChip } from './ecrans/EcranInserirChip';
-import { EcranTestes } from './ecrans/EcranTestes';
-import { EcranVerificacao } from './ecrans/EcranVerificacao';
+import { useBench } from '@atmegapesta/shared';
+import { UnderConstructionScreen } from './screens/UnderConstructionScreen';
+import { InsertChipScreen } from './screens/InsertChipScreen';
+import { TestsScreen } from './screens/TestsScreen';
+import { VerificationScreen } from './screens/VerificationScreen';
 
-/** Os módulos do menu lateral, como no WPF. */
+/** The side menu modules, as in the WPF. */
 type Modulo = 'testes' | 'programacao' | 'configuracoes';
 
 /**
- * A janela da bancada. A navegação é por estado e não por URL: o fluxo é sequencial e um
- * refresh a meio não deve devolver alguém a um passo cujo hardware já mudou de estado.
- * É também o padrão que o React Native vai usar.
+ * The bench window. Navigation goes by state and not by URL: the flow is sequential and a
+ * refresh halfway through should not put someone back at a step whose hardware has already
+ * changed state. It is also the pattern React Native will use.
  */
 export function App() {
-  const bancada = usarBancada();
+  const bench = useBench();
   const [modulo, setModulo] = useState<Modulo>('testes');
-  const relogio = usarRelogio();
+  const clock = useClock();
 
-  const verificada = bancada.fase === 'trabalho';
+  const verificada = bench.phase === 'work';
 
   return (
     <div className="app">
-      <header className="cabecalho">
+      <header className="header">
         <div>
-          <h1 className="cabecalho__titulo">ATMegaPesta V1 — Banca de recuperação</h1>
-          <div className="cabecalho__sub">
+          <h1 className="header__title">ATMegaPesta V1 — Banca de recuperação</h1>
+          <div className="header__sub">
             ATmega328P via USBAsp · master ATmega2560 via CH340
-            {bancada.deteccao?.portaCom && ` (${bancada.deteccao.portaCom})`}
+            {bench.detection?.comPort && ` (${bench.detection.comPort})`}
           </div>
         </div>
-        <time className="cabecalho__relogio">{relogio}</time>
+        <time className="header__clock">{clock}</time>
       </header>
 
-      <div className="corpo">
+      <div className="body">
         <nav className="menu" aria-label="Módulos">
           <ItemMenu
-            rotulo="Testes"
-            activo={modulo === 'testes'}
-            aoEscolher={() => setModulo('testes')}
+            label="Testes"
+            active={modulo === 'testes'}
+            onChoose={() => setModulo('testes')}
           />
           <ItemMenu
-            rotulo="Programação de alta tensão"
-            activo={modulo === 'programacao'}
-            // Enquanto a bancada não estiver verificada não há nada a programar.
+            label="Programação de alta tensão"
+            active={modulo === 'programacao'}
+            // While the bench is not verified there is nothing to program.
             desactivado={!verificada}
-            aoEscolher={() => setModulo('programacao')}
+            onChoose={() => setModulo('programacao')}
           />
           <ItemMenu
-            rotulo="Configurações"
-            activo={modulo === 'configuracoes'}
+            label="Configurações"
+            active={modulo === 'configuracoes'}
             desactivado={!verificada}
-            aoEscolher={() => setModulo('configuracoes')}
+            onChoose={() => setModulo('configuracoes')}
           />
         </nav>
 
-        <main className="conteudo">
-          {bancada.fase === 'verificacao' && <EcranVerificacao bancada={bancada} />}
-          {bancada.fase === 'inserirChip' && <EcranInserirChip bancada={bancada} />}
+        <main className="content">
+          {bench.phase === 'verification' && <VerificationScreen bench={bench} />}
+          {bench.phase === 'insertChip' && <InsertChipScreen bench={bench} />}
 
           {verificada && modulo === 'testes' && (
-            <EcranTestes bancada={bancada} aoAbrirAltaTensao={() => setModulo('programacao')} />
+            <TestsScreen bench={bench} onOpenHighVoltage={() => setModulo('programacao')} />
           )}
           {verificada && modulo === 'programacao' && (
-            <EcranEmConstrucao modulo="Programação de alta tensão" />
+            <UnderConstructionScreen modulo="Programação de alta tensão" />
           )}
-          {verificada && modulo === 'configuracoes' && <EcranEmConstrucao modulo="Configurações" />}
+          {verificada && modulo === 'configuracoes' && <UnderConstructionScreen modulo="Configurações" />}
         </main>
       </div>
     </div>
@@ -73,39 +73,39 @@ export function App() {
 }
 
 function ItemMenu({
-  rotulo,
-  activo,
+  label,
+  active,
   desactivado,
-  aoEscolher,
+  onChoose,
 }: {
-  rotulo: string;
-  activo: boolean;
+  label: string;
+  active: boolean;
   desactivado?: boolean;
-  aoEscolher: () => void;
+  onChoose: () => void;
 }) {
   return (
     <button
       type="button"
       className="menu__item"
-      {...(activo ? { 'aria-current': 'page' as const } : {})}
+      {...(active ? { 'aria-current': 'page' as const } : {})}
       disabled={desactivado === true}
-      onClick={aoEscolher}
+      onClick={onChoose}
     >
-      {rotulo}
+      {label}
     </button>
   );
 }
 
-/** O relógio do cabeçalho, ao segundo, como o DispatcherTimer do WPF. */
-function usarRelogio(): string {
-  const [agora, setAgora] = useState(() => new Date());
+/** The header clock, to the second, like the WPF's DispatcherTimer. */
+function useClock(): string {
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const id = setInterval(() => setAgora(new Date()), 1000);
+    const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  return agora.toLocaleString('pt-PT', {
+  return now.toLocaleString('pt-PT', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

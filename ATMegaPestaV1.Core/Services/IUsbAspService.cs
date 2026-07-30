@@ -1,56 +1,56 @@
 namespace ATMegaPestaV1.Services;
 
 /// <summary>
-/// Resultado de uma operação avrdude ISP.
-/// <paramref name="Assinatura"/> e <paramref name="Dispositivo"/> vêm do output do
-/// avrdude quando o chip responde (ex.: "1E 95 0F" e "ATmega328P").
+/// Result of an avrdude ISP operation.
+/// <paramref name="Signature"/> and <paramref name="Device"/> come from avrdude's output
+/// when the chip answers (e.g. "1E 95 0F" and "ATmega328P").
 /// </summary>
-public record AvrdudeResult(bool Success, string Output, string? Assinatura = null, string? Dispositivo = null);
+public record AvrdudeResult(bool Success, string Output, string? Signature = null, string? Device = null);
 
 /// <summary>
-/// Resultado da leitura dos fuse bits (lfuse/hfuse/efuse) e do lock byte.
-/// Os valores vêm em hexadecimal (ex.: "0xFF") ou null se a leitura falhou.
+/// Result of reading the fuse bits (lfuse/hfuse/efuse) and the lock byte.
+/// Values come in hexadecimal (e.g. "0xFF"), or null if the read failed.
 /// </summary>
 public record FusesResult(bool Success, string? Low, string? High, string? Extended, string? Lock, string Output);
 
 /// <summary>
-/// Resultado de uma cópia de segurança do chip-alvo.
+/// Result of a backup of the target chip.
 /// </summary>
-/// <param name="Ficheiros">Caminhos escritos, para se poder dizer ao utilizador onde ficaram.</param>
+/// <param name="Files">Paths written, so the user can be told where they ended up.</param>
 /// <param name="Fuses">
-/// Os fuse bits como estavam no momento da cópia. Sem eles a cópia não repõe o chip:
-/// as memórias voltam a lá estar mas a correr com outro relógio, outro brown-out, ou
-/// com o ISP fechado.
+/// The fuse bits as they stood at backup time. Without them the backup does not restore
+/// the chip: the memories are back in place but running off a different clock, a
+/// different brown-out level, or with ISP disabled.
 /// </param>
-public record CopiaResult(bool Success, string Output, IReadOnlyList<string> Ficheiros, FusesResult Fuses);
+public record BackupResult(bool Success, string Output, IReadOnlyList<string> Files, FusesResult Fuses);
 
 /// <summary>
-/// Wrapper sobre o avrdude para comunicar com o chip-alvo via USBAsp.
+/// Wrapper over avrdude for talking to the target chip through the USBAsp.
 /// </summary>
 public interface IUsbAspService
 {
     /// <summary>
-    /// Lê a Flash, a EEPROM e os fuse bits do chip-alvo. As memórias vão para ficheiros
-    /// Intel HEX; os fuses voltam no resultado, para quem chama os poder registar.
-    /// Continua a ser só leitura: é o que se guarda antes de a verificação de integridade
-    /// escrever sobre o que o aluno tem no chip.
+    /// Reads Flash, EEPROM and the fuse bits off the target chip. The memories go to
+    /// Intel HEX files; the fuses come back in the result so the caller can record them.
+    /// Still read-only: this is what gets saved before the integrity check writes over
+    /// whatever the student has on the chip.
     /// </summary>
-    Task<CopiaResult> GuardarCopiaAsync(string caminhoFlash, string caminhoEeprom,
-                                        CancellationToken ct = default);
+    Task<BackupResult> SaveBackupAsync(string flashPath, string eepromPath,
+                                       CancellationToken ct = default);
 
     /// <summary>
-    /// Tenta aceder ao chip-alvo: avrdude -c usbasp -p m328p.
-    /// Devolve o output completo e se foi bem-sucedido (signature lida).
+    /// Attempts to reach the target chip: avrdude -c usbasp -p m328p.
+    /// Returns the full output and whether it succeeded (signature read).
     /// </summary>
-    Task<AvrdudeResult> DetectarAssinaturaAsync(CancellationToken ct = default);
+    Task<AvrdudeResult> DetectSignatureAsync(CancellationToken ct = default);
 
     /// <summary>
-    /// Re-tenta o ISP após clock injection: avrdude -c usbasp -p m328p.
+    /// Retries ISP after clock injection: avrdude -c usbasp -p m328p.
     /// </summary>
     Task<AvrdudeResult> RetryIspAsync(CancellationToken ct = default);
 
     /// <summary>
-    /// Lê os fuse bits do chip-alvo (lfuse, hfuse, efuse) via avrdude.
+    /// Reads the target chip's fuse bits (lfuse, hfuse, efuse) through avrdude.
     /// </summary>
-    Task<FusesResult> LerFusesAsync(CancellationToken ct = default);
+    Task<FusesResult> ReadFusesAsync(CancellationToken ct = default);
 }

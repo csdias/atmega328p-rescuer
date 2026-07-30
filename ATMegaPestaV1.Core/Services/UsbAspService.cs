@@ -5,88 +5,89 @@ using System.Text.RegularExpressions;
 namespace ATMegaPestaV1.Services;
 
 /// <summary>
-/// Implementação real do UsbAspService via avrdude.exe.
+/// Real UsbAspService implementation over avrdude.exe.
 /// </summary>
 public class UsbAspService : IUsbAspService
 {
-    // -v para o avrdude imprimir o nome/assinatura do dispositivo (na verbosidade
-    // por defeito o avrdude 8.1 não o faz).
+    // -v so avrdude prints the device name/signature (at the default verbosity
+    // avrdude 8.1 does not).
     private const string AvrdudeArgs = "-c usbasp -p m328p -v";
 
-    // Leitura dos fuses e do lock byte para stdout em hexadecimal (o texto
-    // informativo vai para stderr). Só leitura — nunca se escrevem fuses.
+    // Reads the fuses and the lock byte to stdout in hexadecimal (the informational
+    // text goes to stderr). Read-only — fuses are never written.
     private const string FusesArgs =
         "-c usbasp -p m328p -U lfuse:r:-:h -U hfuse:r:-:h -U efuse:r:-:h -U lock:r:-:h";
 
-    public Task<AvrdudeResult> DetectarAssinaturaAsync(CancellationToken ct = default) =>
-        Task.Run(() => CorrerAvrdude(AvrdudeArgs), ct);
+    public Task<AvrdudeResult> DetectSignatureAsync(CancellationToken ct = default) =>
+        Task.Run(() => RunAvrdude(AvrdudeArgs), ct);
 
     public Task<AvrdudeResult> RetryIspAsync(CancellationToken ct = default) =>
-        Task.Run(() => CorrerAvrdude(AvrdudeArgs), ct);
+        Task.Run(() => RunAvrdude(AvrdudeArgs), ct);
 
-    public Task<FusesResult> LerFusesAsync(CancellationToken ct = default) =>
-        Task.Run(LerFuses, ct);
+    public Task<FusesResult> ReadFusesAsync(CancellationToken ct = default) =>
+        Task.Run(ReadFuses, ct);
 
-    public Task<CopiaResult> GuardarCopiaAsync(string caminhoFlash, string caminhoEeprom,
-                                               CancellationToken ct = default) =>
-        Task.Run(() => GuardarCopia(caminhoFlash, caminhoEeprom), ct);
+    public Task<BackupResult> SaveBackupAsync(string flashPath, string eepromPath,
+                                              CancellationToken ct = default) =>
+        Task.Run(() => SaveBackup(flashPath, eepromPath), ct);
 
     /// <summary>
-    /// Uma só invocação para as duas memórias e os fuses: o avrdude faz um "program
-    /// enable" por execução, e execuções separadas dariam ao chip várias oportunidades
-    /// de não responder para uma cópia que só vale inteira. As memórias vão para
-    /// ficheiros, os fuses para stdout — que fica assim só com eles.
+    /// A single invocation for both memories and the fuses: avrdude does one "program
+    /// enable" per run, and separate runs would give the chip several chances to not
+    /// answer for a backup that is only worth anything whole. The memories go to files,
+    /// the fuses to stdout — which is then left holding only them.
     /// </summary>
-    private static CopiaResult GuardarCopia(string caminhoFlash, string caminhoEeprom)
+    private static BackupResult SaveBackup(string flashPath, string eepromPath)
     {
-        var ficheiros = new[] { caminhoFlash, caminhoEeprom };
+        var files = new[] { flashPath, eepromPath };
 
         try
         {
-            var (exitCode, stdout, stderr) = ExecutarAvrdude(
-                $"-c usbasp -p m328p -U flash:r:\"{caminhoFlash}\":i -U eeprom:r:\"{caminhoEeprom}\":i " +
+            var (exitCode, stdout, stderr) = ExecuteAvrdude(
+                $"-c usbasp -p m328p -U flash:r:\"{flashPath}\":i -U eeprom:r:\"{eepromPath}\":i " +
                 "-U lfuse:r:-:h -U hfuse:r:-:h -U efuse:r:-:h -U lock:r:-:h");
 
             var output = (stdout + stderr).Trim();
             if (output.Length == 0)
                 output = "Sem resposta do avrdude.";
 
-            var fuses = InterpretarFuses(exitCode, stdout, output);
+            var fuses = ParseFuses(exitCode, stdout, output);
 
-            // Uma cópia sem fuses repõe as memórias mas não o chip: voltaria a correr
-            // com outro relógio ou com o ISP fechado. Por isso conta como incompleta.
+            // A backup without fuses restores the memories but not the chip: it would
+            // come back running off a different clock or with ISP disabled. So it counts
+            // as incomplete.
             //
-            // Ficheiros com conteúdo, não ficheiros existentes: o avrdude cria a saída
-            // antes de falar com o chip, e uma leitura falhada deixa-a com zero bytes.
-            var completa = exitCode == 0
+            // Files with content, not files that exist: avrdude creates the output before
+            // it talks to the chip, and a failed read leaves it at zero bytes.
+            var complete = exitCode == 0
                            && fuses.Success
-                           && ficheiros.All(f => new FileInfo(f) is { Exists: true, Length: > 0 });
+                           && files.All(f => new FileInfo(f) is { Exists: true, Length: > 0 });
 
-            return new CopiaResult(completa, output, ficheiros, fuses);
+            return new BackupResult(complete, output, files, fuses);
         }
         catch (Exception ex)
         {
-            var erro = $"Erro ao executar avrdude: {ex.Message}";
-            return new CopiaResult(false, erro, ficheiros,
-                new FusesResult(false, null, null, null, null, erro));
+            var error = $"Erro ao executar avrdude: {ex.Message}";
+            return new BackupResult(false, error, files,
+                new FusesResult(false, null, null, null, null, error));
         }
     }
 
-    private static AvrdudeResult CorrerAvrdude(string args)
+    private static AvrdudeResult RunAvrdude(string args)
     {
         try
         {
-            var (exitCode, stdout, stderr) = ExecutarAvrdude(args);
+            var (exitCode, stdout, stderr) = ExecuteAvrdude(args);
 
             var output = (stdout + stderr).Trim();
             if (output.Length == 0)
                 output = "Sem resposta do avrdude.";
 
-            // O avrdude devolve código 0 apenas quando o chip responde e a
-            // assinatura é lida/validada — critério robusto, ao contrário de
-            // procurar strings na saída.
+            // avrdude returns code 0 only when the chip answers and the signature is
+            // read/validated — a robust criterion, unlike hunting for strings in the
+            // output.
             return new AvrdudeResult(exitCode == 0, output,
-                ExtrairAssinatura(output), ExtrairDispositivo(output));
+                ExtractSignature(output), ExtractDevice(output));
         }
         catch (Exception ex)
         {
@@ -94,17 +95,17 @@ public class UsbAspService : IUsbAspService
         }
     }
 
-    private static FusesResult LerFuses()
+    private static FusesResult ReadFuses()
     {
         try
         {
-            var (exitCode, stdout, stderr) = ExecutarAvrdude(FusesArgs);
+            var (exitCode, stdout, stderr) = ExecuteAvrdude(FusesArgs);
 
             var output = (stdout + stderr).Trim();
             if (output.Length == 0)
                 output = "Sem resposta do avrdude.";
 
-            return InterpretarFuses(exitCode, stdout, output);
+            return ParseFuses(exitCode, stdout, output);
         }
         catch (Exception ex)
         {
@@ -113,38 +114,39 @@ public class UsbAspService : IUsbAspService
     }
 
     /// <summary>
-    /// Extrai os fuses do stdout de um avrdude que os leu para "-" em hexadecimal: um
-    /// valor por leitura, na ordem pedida — lfuse, hfuse, efuse, lock. O texto
-    /// informativo do avrdude vai para stderr, pelo que o stdout traz só estes valores.
+    /// Pulls the fuses out of the stdout of an avrdude that read them to "-" in
+    /// hexadecimal: one value per read, in the order asked for — lfuse, hfuse, efuse,
+    /// lock. avrdude's informational text goes to stderr, so stdout carries only these
+    /// values.
     /// </summary>
-    private static FusesResult InterpretarFuses(int exitCode, string stdout, string output)
+    private static FusesResult ParseFuses(int exitCode, string stdout, string output)
     {
-        var valores = Regex.Matches(stdout, @"0x[0-9a-fA-F]{2}")
+        var values = Regex.Matches(stdout, @"0x[0-9a-fA-F]{2}")
             .Select(m => m.Value.ToUpperInvariant())
             .ToList();
 
-        if (exitCode == 0 && valores.Count >= 3)
-            return new FusesResult(true, valores[0], valores[1], valores[2],
-                valores.Count >= 4 ? valores[3] : null, output);
+        if (exitCode == 0 && values.Count >= 3)
+            return new FusesResult(true, values[0], values[1], values[2],
+                values.Count >= 4 ? values[3] : null, output);
 
         return new FusesResult(false, null, null, null, null, output);
     }
 
-    /// <summary>Extrai "1E 95 0F" de "Device signature = 1E 95 0F (ATmega328P, ...)".</summary>
-    private static string? ExtrairAssinatura(string output)
+    /// <summary>Pulls "1E 95 0F" out of "Device signature = 1E 95 0F (ATmega328P, ...)".</summary>
+    private static string? ExtractSignature(string output)
     {
         var m = Regex.Match(output, @"Device signature\s*=\s*(?:0x)?([0-9A-Fa-f]{2}(?:\s+[0-9A-Fa-f]{2})*|[0-9A-Fa-f]{6})");
         return m.Success ? m.Groups[1].Value.Trim().ToUpperInvariant() : null;
     }
 
-    /// <summary>Extrai "ATmega328P" da linha "AVR part : ATmega328P".</summary>
-    private static string? ExtrairDispositivo(string output)
+    /// <summary>Pulls "ATmega328P" out of the "AVR part : ATmega328P" line.</summary>
+    private static string? ExtractDevice(string output)
     {
         var m = Regex.Match(output, @"AVR part\s*:\s*(\S+)");
         return m.Success ? m.Groups[1].Value.Trim() : null;
     }
 
-    private static (int exitCode, string stdout, string stderr) ExecutarAvrdude(string args)
+    private static (int exitCode, string stdout, string stderr) ExecuteAvrdude(string args)
     {
         var psi = new ProcessStartInfo
         {

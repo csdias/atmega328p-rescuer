@@ -10,16 +10,16 @@
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         MinHeight="500" MinWidth="750"
-        Background="{DynamicResource BrushFundoJanela}"
-        FontFamily="{DynamicResource FonteUI}"
+        Background="{DynamicResource BrushWindowBackground}"
+        FontFamily="{DynamicResource FontUI}"
         Loaded="Window_Loaded"
         KeyDown="Window_KeyDown">
 
     <Window.Resources>
-        <!-- Botao principal -->
+        <!-- Primary button -->
         <Style x:Key="ActionButton" TargetType="Button">
-            <Setter Property="Background" Value="{DynamicResource BrushBtnClaro}"/>
-            <Setter Property="Foreground" Value="{DynamicResource BrushBtnClaroText}"/>
+            <Setter Property="Background" Value="{DynamicResource BrushBtnLight}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushBtnLightText}"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="28,10"/>
@@ -28,24 +28,24 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <!-- A moldura so existe no tema vintage (EspessuraBotao=1): um botao
-                             cinzento sem contorno sobre fundo cinzento desaparece. La o
-                             relevo e saliente, para o botao se ler como premivel. Nos temas
-                             claro/escuro o botao e preenchido e a espessura fica a 0. -->
+                        <!-- The frame only exists in the vintage theme (ButtonThickness=1): a grey
+                             button with no outline on a grey background disappears. There the
+                             bevel is raised, so the button reads as pressable. In the light/dark
+                             themes the button is filled and the thickness stays at 0. -->
                         <Border Background="{TemplateBinding Background}"
-                                CornerRadius="{DynamicResource RaioMedio}"
-                                BorderBrush="{DynamicResource BrushRelevoElevado}"
-                                BorderThickness="{DynamicResource EspessuraBotao}"
+                                CornerRadius="{DynamicResource RadiusMedium}"
+                                BorderBrush="{DynamicResource BrushBevelRaised}"
+                                BorderThickness="{DynamicResource ButtonThickness}"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource BrushBtnClaroHover}"/>
+                                <Setter Property="Background" Value="{DynamicResource BrushBtnLightHover}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="{DynamicResource BrushBtnDesativ}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource BrushBtnDesativText}"/>
+                                <Setter Property="Background" Value="{DynamicResource BrushBtnDisabled}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource BrushBtnDisabledText}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -53,12 +53,12 @@
             </Setter>
         </Style>
 
-        <!-- Menu lateral (drawer) -->
-        <sys:Double x:Key="LarguraMenuFechado">56</sys:Double>
-        <sys:Double x:Key="LarguraMenuAberto">250</sys:Double>
+        <!-- Side menu (drawer) -->
+        <sys:Double x:Key="MenuWidthClosed">56</sys:Double>
+        <sys:Double x:Key="MenuWidthOpen">250</sys:Double>
 
         <Style x:Key="MenuButton" TargetType="RadioButton">
-            <Setter Property="Foreground" Value="{DynamicResource BrushTextoNormal}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextNormal}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Padding" Value="14,11"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -75,12 +75,12 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushRealce}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushHighlight}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushRealce}"/>
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource BrushMenuAccento}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource BrushTextoTitulo}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushHighlight}"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource BrushMenuAccent}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource BrushTextTitle}"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -88,14 +88,14 @@
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
-                <!-- Com o drawer aberto o rotulo ja esta visivel; a tooltip seria redundante -->
+                <!-- With the drawer open the label is already visible; the tooltip would be redundant -->
                 <DataTrigger Binding="{Binding IsMouseOver, ElementName=MenuDrawer}" Value="True">
                     <Setter Property="ToolTipService.IsEnabled" Value="False"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
-        <!-- Icone: largura fixa para ficar alinhado com o drawer fechado -->
+        <!-- Icon: fixed width so it lines up with the closed drawer -->
         <Style x:Key="MenuIcon" TargetType="TextBlock">
             <Setter Property="Width" Value="24"/>
             <Setter Property="FontSize" Value="16"/>
@@ -104,7 +104,7 @@
             <Setter Property="Margin" Value="0,0,12,0"/>
         </Style>
 
-        <!-- Rotulo: so aparece com o drawer aberto -->
+        <!-- Label: only appears with the drawer open -->
         <Style x:Key="MenuLabel" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Opacity" Value="0"/>
@@ -129,11 +129,11 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Drawer: fechado mostra apenas icones, expande sobre o conteudo ao passar o rato -->
+        <!-- Drawer: closed it shows icons only, expands over the content on hover -->
         <Style x:Key="MenuDrawerStyle" TargetType="Border">
-            <Setter Property="Width" Value="{StaticResource LarguraMenuFechado}"/>
-            <Setter Property="Background" Value="{DynamicResource BrushFundoMenu}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource BrushSeparador}"/>
+            <Setter Property="Width" Value="{StaticResource MenuWidthClosed}"/>
+            <Setter Property="Background" Value="{DynamicResource BrushMenuBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushSeparator}"/>
             <Setter Property="BorderThickness" Value="0,0,1,0"/>
             <Setter Property="ClipToBounds" Value="True"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
@@ -149,7 +149,7 @@
                         <BeginStoryboard>
                             <Storyboard>
                                 <DoubleAnimation Storyboard.TargetProperty="Width"
-                                                 To="{StaticResource LarguraMenuAberto}" Duration="0:0:0.20">
+                                                 To="{StaticResource MenuWidthOpen}" Duration="0:0:0.20">
                                     <DoubleAnimation.EasingFunction>
                                         <CubicEase EasingMode="EaseOut"/>
                                     </DoubleAnimation.EasingFunction>
@@ -163,7 +163,7 @@
                         <BeginStoryboard>
                             <Storyboard>
                                 <DoubleAnimation Storyboard.TargetProperty="Width"
-                                                 To="{StaticResource LarguraMenuFechado}" Duration="0:0:0.20">
+                                                 To="{StaticResource MenuWidthClosed}" Duration="0:0:0.20">
                                     <DoubleAnimation.EasingFunction>
                                         <CubicEase EasingMode="EaseOut"/>
                                     </DoubleAnimation.EasingFunction>
@@ -180,7 +180,7 @@
         <Style x:Key="StatusEllipse" TargetType="Ellipse">
             <Setter Property="Width" Value="18"/>
             <Setter Property="Height" Value="18"/>
-            <Setter Property="Stroke" Value="{DynamicResource BrushTextoSubtil}"/>
+            <Setter Property="Stroke" Value="{DynamicResource BrushTextSubtle}"/>
             <Setter Property="StrokeThickness" Value="1.5"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,0,12,0"/>
@@ -188,8 +188,8 @@
     </Window.Resources>
 
     <Grid>
-        <!-- ==================== PAINEL VERIFICACAO ==================== -->
-        <Grid x:Name="PanelVerificacao" Margin="30">
+        <!-- ==================== VERIFICATION PANEL ==================== -->
+        <Grid x:Name="VerificationPanel" Margin="30">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="30"/>
@@ -206,12 +206,12 @@
 
             <TextBlock Grid.Row="0"
                        Text="Verificação de Dispositivos"
-                       Foreground="{DynamicResource BrushTextoTitulo}" FontSize="24" FontWeight="Bold"
+                       Foreground="{DynamicResource BrushTextTitle}" FontSize="24" FontWeight="Bold"
                        HorizontalAlignment="Center"/>
 
             <!-- CH340 -->
-            <Border Grid.Row="2" Background="{DynamicResource BrushFundoCard}" CornerRadius="{DynamicResource RaioGrande}"
-                    BorderBrush="{DynamicResource BrushRelevoAfundado}" BorderThickness="{DynamicResource EspessuraCartao}"
+            <Border Grid.Row="2" Background="{DynamicResource BrushCardBackground}" CornerRadius="{DynamicResource RadiusLarge}"
+                    BorderBrush="{DynamicResource BrushBevelSunken}" BorderThickness="{DynamicResource CardThickness}"
                     Padding="20,14" Margin="0,0,0,10">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -220,19 +220,19 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal">
-                        <Ellipse x:Name="LedCH340" Style="{StaticResource StatusEllipse}" Fill="{DynamicResource BrushTextoSubtil}"/>
-                        <TextBlock Foreground="{DynamicResource BrushTextoTitulo}" FontSize="16" VerticalAlignment="Center"
+                        <Ellipse x:Name="LedCH340" Style="{StaticResource StatusEllipse}" Fill="{DynamicResource BrushTextSubtle}"/>
+                        <TextBlock Foreground="{DynamicResource BrushTextTitle}" FontSize="16" VerticalAlignment="Center"
                                    Text="CH340 — Conversor USB-Serial"/>
                     </StackPanel>
                     <TextBlock x:Name="TxtCH340Detail" Grid.Row="2"
-                               Foreground="{DynamicResource BrushTextoNormal}" FontSize="13" VerticalAlignment="Center" Margin="30,0,0,0"
+                               Foreground="{DynamicResource BrushTextNormal}" FontSize="13" VerticalAlignment="Center" Margin="30,0,0,0"
                                Text="Estado: A aguardar verificação..."/>
                 </Grid>
             </Border>
 
             <!-- USBAsp -->
-            <Border Grid.Row="3" Background="{DynamicResource BrushFundoCard}" CornerRadius="{DynamicResource RaioGrande}"
-                    BorderBrush="{DynamicResource BrushRelevoAfundado}" BorderThickness="{DynamicResource EspessuraCartao}"
+            <Border Grid.Row="3" Background="{DynamicResource BrushCardBackground}" CornerRadius="{DynamicResource RadiusLarge}"
+                    BorderBrush="{DynamicResource BrushBevelSunken}" BorderThickness="{DynamicResource CardThickness}"
                     Padding="20,14" Margin="0,0,0,10">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -241,19 +241,19 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal">
-                        <Ellipse x:Name="LedUSBAsp" Style="{StaticResource StatusEllipse}" Fill="{DynamicResource BrushTextoSubtil}"/>
-                        <TextBlock Foreground="{DynamicResource BrushTextoTitulo}" FontSize="16" VerticalAlignment="Center"
+                        <Ellipse x:Name="LedUSBAsp" Style="{StaticResource StatusEllipse}" Fill="{DynamicResource BrushTextSubtle}"/>
+                        <TextBlock Foreground="{DynamicResource BrushTextTitle}" FontSize="16" VerticalAlignment="Center"
                                    Text="USBAsp — Programador AVR"/>
                     </StackPanel>
                     <TextBlock x:Name="TxtUSBaspDetail" Grid.Row="2"
-                               Foreground="{DynamicResource BrushTextoNormal}" FontSize="13" VerticalAlignment="Center" Margin="30,0,0,0"
+                               Foreground="{DynamicResource BrushTextNormal}" FontSize="13" VerticalAlignment="Center" Margin="30,0,0,0"
                                Text="Estado: A aguardar verificação..."/>
                 </Grid>
             </Border>
 
             <!-- Signature -->
-            <Border Grid.Row="4" Background="{DynamicResource BrushFundoCard}" CornerRadius="{DynamicResource RaioGrande}"
-                    BorderBrush="{DynamicResource BrushRelevoAfundado}" BorderThickness="{DynamicResource EspessuraCartao}"
+            <Border Grid.Row="4" Background="{DynamicResource BrushCardBackground}" CornerRadius="{DynamicResource RadiusLarge}"
+                    BorderBrush="{DynamicResource BrushBevelSunken}" BorderThickness="{DynamicResource CardThickness}"
                     Padding="20,14" Margin="0,0,0,10">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -262,35 +262,35 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal">
-                        <Ellipse x:Name="LedSignature" Style="{StaticResource StatusEllipse}" Fill="{DynamicResource BrushTextoSubtil}"/>
-                        <TextBlock Foreground="{DynamicResource BrushTextoTitulo}" FontSize="16" VerticalAlignment="Center"
+                        <Ellipse x:Name="LedSignature" Style="{StaticResource StatusEllipse}" Fill="{DynamicResource BrushTextSubtle}"/>
+                        <TextBlock Foreground="{DynamicResource BrushTextTitle}" FontSize="16" VerticalAlignment="Center"
                                    Text="Assinatura — Identificação do Equipamento"/>
                     </StackPanel>
                     <TextBlock x:Name="TxtSignatureDetail" Grid.Row="2"
-                               Foreground="{DynamicResource BrushTextoNormal}" FontSize="13" VerticalAlignment="Center" Margin="30,0,0,0"
+                               Foreground="{DynamicResource BrushTextNormal}" FontSize="13" VerticalAlignment="Center" Margin="30,0,0,0"
                                Text="Estado: A aguardar verificação..."/>
                 </Grid>
             </Border>
 
-            <TextBlock x:Name="TxtTentativas" Grid.Row="6"
-                       Foreground="{DynamicResource BrushTextoNormal}" FontSize="13" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="TxtAttempts" Grid.Row="6"
+                       Foreground="{DynamicResource BrushTextNormal}" FontSize="13" HorizontalAlignment="Center"/>
 
-            <TextBlock x:Name="TxtMensagem" Grid.Row="7"
+            <TextBlock x:Name="TxtMessage" Grid.Row="7"
                        Foreground="#F38BA8" FontSize="14" FontWeight="SemiBold"
                        HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"
                        Margin="0,10,0,0"/>
 
             <StackPanel Grid.Row="9" HorizontalAlignment="Center" Margin="0,0,0,10">
-                <Button x:Name="BtnVerificar" Style="{StaticResource ActionButton}"
-                        Content="Verificar Dispositivos" Click="BtnVerificar_Click"/>
+                <Button x:Name="BtnVerify" Style="{StaticResource ActionButton}"
+                        Content="Verificar Dispositivos" Click="BtnVerify_Click"/>
             </StackPanel>
 
-            <TextBlock x:Name="TxtRodape" Grid.Row="10"
-                       Foreground="{DynamicResource BrushTextoSubtil}" FontSize="12" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="TxtFooter" Grid.Row="10"
+                       Foreground="{DynamicResource BrushTextSubtle}" FontSize="12" HorizontalAlignment="Center"/>
         </Grid>
 
-        <!-- ==================== PAINEL PRINCIPAL ==================== -->
-        <Grid x:Name="PanelPrincipal" Visibility="Collapsed">
+        <!-- ==================== MAIN PANEL ==================== -->
+        <Grid x:Name="MainPanel" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -298,69 +298,69 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <Border Grid.Row="0" Background="{DynamicResource BrushFundoHeader}" Padding="20,14">
+            <Border Grid.Row="0" Background="{DynamicResource BrushHeaderBackground}" Padding="20,14">
                 <Grid>
-                    <TextBlock Foreground="{DynamicResource BrushTextoTitulo}" FontSize="18" FontWeight="Bold"
+                    <TextBlock Foreground="{DynamicResource BrushTextTitle}" FontSize="18" FontWeight="Bold"
                                VerticalAlignment="Center"
                                Text="ATmega328P Rescuer Pesta V1"/>
-                    <TextBlock x:Name="TxtHeaderDataHora" Foreground="{DynamicResource BrushTextoNormal}" FontSize="12"
+                    <TextBlock x:Name="TxtHeaderDateTime" Foreground="{DynamicResource BrushTextNormal}" FontSize="12"
                                HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
             </Border>
 
-            <!-- Corpo: Menu + Conteudo -->
+            <!-- Body: menu + content -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <!-- Calha fixa: o drawer aberto sobrepoe-se ao conteudo em vez de o empurrar -->
+                    <!-- Fixed gutter: the open drawer overlays the content instead of pushing it -->
                     <ColumnDefinition Width="56"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Conteudo -->
-                <ContentControl x:Name="ConteudoPrincipal" Grid.Column="1"/>
+                <!-- Content -->
+                <ContentControl x:Name="MainContent" Grid.Column="1"/>
 
-                <!-- Menu lateral (drawer) -->
+                <!-- Side menu (drawer) -->
                 <Border x:Name="MenuDrawer" Grid.Column="0" Grid.ColumnSpan="2" Panel.ZIndex="10"
                         Style="{StaticResource MenuDrawerStyle}">
                     <StackPanel Margin="0,10,0,0">
-                        <RadioButton x:Name="MenuTestes" Style="{StaticResource MenuButton}"
+                        <RadioButton x:Name="MenuTests" Style="{StaticResource MenuButton}"
                                      Tag="Teste de Funcionalidades"
                                      IsChecked="True"
                                      Checked="MenuItem_Checked">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="⚙" Style="{StaticResource MenuIcon}"/>
                                 <TextBlock Text="Teste de Funcionalidades" Style="{StaticResource MenuLabel}"
-                                           x:Name="TxtMenuTestes"/>
+                                           x:Name="TxtMenuTests"/>
                             </StackPanel>
                         </RadioButton>
-                        <RadioButton x:Name="MenuProgramacao" Style="{StaticResource MenuButton}"
+                        <RadioButton x:Name="MenuProgramming" Style="{StaticResource MenuButton}"
                                      Tag="Programação de Alta Tensão"
                                      Checked="MenuItem_Checked">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="⚡" Style="{StaticResource MenuIcon}"/>
                                 <TextBlock Text="Programação de Alta Tensão" Style="{StaticResource MenuLabel}"
-                                           x:Name="TxtMenuProgramacao"/>
+                                           x:Name="TxtMenuProgramming"/>
                             </StackPanel>
                         </RadioButton>
-                        <RadioButton x:Name="MenuConfiguracoes" Style="{StaticResource MenuButton}"
+                        <RadioButton x:Name="MenuSettings" Style="{StaticResource MenuButton}"
                                      Tag="Configurações"
                                      Checked="MenuItem_Checked">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="☰" Style="{StaticResource MenuIcon}"/>
                                 <TextBlock Text="Configurações" Style="{StaticResource MenuLabel}"
-                                           x:Name="TxtMenuConfiguracoes"/>
+                                           x:Name="TxtMenuSettings"/>
                             </StackPanel>
                         </RadioButton>
                     </StackPanel>
                 </Border>
             </Grid>
 
-            <!-- Rodape -->
-            <Border Grid.Row="2" Background="{DynamicResource BrushFundoHeader}" Padding="16,10">
+            <!-- Footer -->
+            <Border Grid.Row="2" Background="{DynamicResource BrushHeaderBackground}" Padding="16,10">
                 <Grid>
-                    <TextBlock Foreground="{DynamicResource BrushTextoSubtil}" FontSize="11" VerticalAlignment="Center"
+                    <TextBlock Foreground="{DynamicResource BrushTextSubtle}" FontSize="11" VerticalAlignment="Center"
                                Text="ATmega328P Rescuer Pesta V1"/>
-                    <TextBlock Foreground="{DynamicResource BrushTextoSubtil}" FontSize="11" HorizontalAlignment="Right"
+                    <TextBlock Foreground="{DynamicResource BrushTextSubtle}" FontSize="11" HorizontalAlignment="Right"
                                VerticalAlignment="Center"
                                Text="v1.0.0"/>
                 </Grid>

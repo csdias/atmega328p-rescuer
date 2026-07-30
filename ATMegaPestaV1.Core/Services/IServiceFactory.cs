@@ -3,42 +3,43 @@ using Microsoft.Extensions.Configuration;
 namespace ATMegaPestaV1.Services;
 
 /// <summary>
-/// Fornece os serviços da bancada. Existe para que os ecrãs peçam o que precisam sem
-/// repetir a construção do serviço em cada sítio: quem precisa de falar com o master ou
-/// com o chip-alvo pede aqui e recebe já com a porta e os tempos de espera configurados.
+/// Supplies the rig's services. It exists so the screens can ask for what they need
+/// without repeating the service construction in every place: whoever needs to talk to
+/// the master or to the target chip asks here and gets it with the port and the timeouts
+/// already configured.
 /// </summary>
 public interface IServiceFactory
 {
-    /// <summary>Varredura ao USB do arranque.</summary>
-    IDeviceDetector CriarDetector();
+    /// <summary>The USB scan done at startup.</summary>
+    IDeviceDetector CreateDetector();
 
-    /// <summary>Ligação ao firmware master, na porta onde o CH340 foi encontrado.</summary>
-    IBusManager CriarBusManager(string portaCom);
+    /// <summary>Link to the master firmware, on the port where the CH340 was found.</summary>
+    IBusManager CreateBusManager(string comPort);
 
-    /// <summary>Acesso ISP ao chip-alvo, via avrdude.</summary>
-    IUsbAspService CriarUsbAspService();
+    /// <summary>ISP access to the target chip, through avrdude.</summary>
+    IUsbAspService CreateUsbAspService();
 }
 
 /// <summary>
-/// A bancada: hardware ligado ao PC. É a única implementação — a app lê sempre os
-/// dispositivos e os fuses reais, por WMI, porta série e avrdude.
+/// The rig: hardware plugged into the PC. This is the only implementation — the app always
+/// reads the real devices and the real fuses, over WMI, serial port and avrdude.
 /// </summary>
 public class RealServiceFactory(int baudRate, int timeoutMs) : IServiceFactory
 {
-    public IDeviceDetector CriarDetector() => new WmiDeviceDetector();
+    public IDeviceDetector CreateDetector() => new WmiDeviceDetector();
 
-    public IBusManager CriarBusManager(string portaCom) => new BusManager(portaCom, baudRate, timeoutMs);
+    public IBusManager CreateBusManager(string comPort) => new BusManager(comPort, baudRate, timeoutMs);
 
-    public IUsbAspService CriarUsbAspService() => new UsbAspService();
+    public IUsbAspService CreateUsbAspService() => new UsbAspService();
 }
 
 /// <summary>
-/// Composição da app: lê do appsettings.json os parâmetros da ligação série e monta
-/// os serviços da bancada.
+/// The app's composition root: reads the serial link parameters from appsettings.json and
+/// assembles the rig's services.
 /// </summary>
 public static class ServiceFactory
 {
-    public static IServiceFactory APartirDe(IConfiguration config)
+    public static IServiceFactory From(IConfiguration config)
     {
         var baudRate = config.GetValue<int>("BaudRate");
         var timeoutMs = config.GetValue<int>("SerialTimeoutMs");

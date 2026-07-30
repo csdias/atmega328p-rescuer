@@ -2,35 +2,35 @@ import { useCallback, useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { usarBancada } from '@atmegapesta/partilhado';
-import { EcranInserirChip } from './src/ecrans/EcranInserirChip';
-import { EcranLigacao } from './src/ecrans/EcranLigacao';
-import { EcranTrabalho } from './src/ecrans/EcranTrabalho';
-import { EcranVerificacao } from './src/ecrans/EcranVerificacao';
-import { estilos } from './src/estilos';
+import { useBench } from '@atmegapesta/shared';
+import { InsertChipScreen } from './src/screens/InsertChipScreen';
+import { ConnectionScreen } from './src/screens/ConnectionScreen';
+import { WorkScreen } from './src/screens/WorkScreen';
+import { VerificationScreen } from './src/screens/VerificationScreen';
+import { estilos } from './src/styles';
 
-const CHAVE_ENDERECO = 'atmegapesta.endereco';
+const CHAVE_ENDERECO = 'atmegapesta.address';
 
 export default function App() {
-  const [endereco, setEndereco] = useState<string | null>(null);
-  const [guardadoLido, setGuardadoLido] = useState(false);
-  const [enderecoGuardado, setEnderecoGuardado] = useState('http://192.168.1.50:5099');
+  const [address, setAddress] = useState<string | null>(null);
+  const [savedLoaded, setSavedLoaded] = useState(false);
+  const [savedAddress, setSavedAddress] = useState('http://192.168.1.50:5099');
 
-  // O endereço da bancada não muda de dia para dia — reescrevê-lo a cada arranque seria
+  // The bench address does not change from one day to the next — retyping it at every
   // trabalho para nada.
   useEffect(() => {
     let vivo = true;
 
     void AsyncStorage.getItem(CHAVE_ENDERECO)
-      .then((valor) => {
+      .then((value) => {
         if (!vivo) return;
-        if (valor) {
-          setEnderecoGuardado(valor);
-          setEndereco(valor);
+        if (value) {
+          setSavedAddress(value);
+          setAddress(value);
         }
       })
       .finally(() => {
-        if (vivo) setGuardadoLido(true);
+        if (vivo) setSavedLoaded(true);
       });
 
     return () => {
@@ -39,67 +39,67 @@ export default function App() {
   }, []);
 
   const ligar = useCallback((novo: string) => {
-    setEndereco(novo);
-    setEnderecoGuardado(novo);
+    setAddress(novo);
+    setSavedAddress(novo);
     void AsyncStorage.setItem(CHAVE_ENDERECO, novo);
   }, []);
 
-  const trocar = useCallback(() => setEndereco(null), []);
+  const trocar = useCallback(() => setAddress(null), []);
 
-  if (!guardadoLido)
+  if (!savedLoaded)
     return (
-      <SafeAreaView style={estilos.ecra}>
+      <SafeAreaView style={estilos.screen}>
         <StatusBar style="dark" />
       </SafeAreaView>
     );
 
-  if (endereco === null)
+  if (address === null)
     return (
-      <SafeAreaView style={estilos.ecra}>
+      <SafeAreaView style={estilos.screen}>
         <StatusBar style="dark" />
-        <Cabecalho endereco={null} />
-        <EcranLigacao enderecoInicial={enderecoGuardado} aoLigar={ligar} />
+        <Cabecalho address={null} />
+        <ConnectionScreen enderecoInicial={savedAddress} onConnect={ligar} />
       </SafeAreaView>
     );
 
-  // A chave força uma montagem nova ao trocar de bancada: o hook guarda estado do
-  // equipamento anterior (porta, tentativas) que não vale para outro.
-  return <Bancada key={endereco} endereco={endereco} aoTrocarBancada={trocar} />;
+  // The key forces a fresh mount when switching bench: the hook keeps state from the
+  // previous rig (port, attempts) that does not hold for another one.
+  return <Bench key={address} address={address} onSwitchBench={trocar} />;
 }
 
-function Bancada({
-  endereco,
-  aoTrocarBancada,
+function Bench({
+  address,
+  onSwitchBench,
 }: {
-  endereco: string;
-  aoTrocarBancada: () => void;
+  address: string;
+  onSwitchBench: () => void;
 }) {
-  const bancada = usarBancada(endereco);
+  const bench = useBench(address);
 
   return (
-    <SafeAreaView style={estilos.ecra}>
+    <SafeAreaView style={estilos.screen}>
       <StatusBar style="dark" />
-      <Cabecalho endereco={endereco} porta={bancada.deteccao?.portaCom ?? null} />
+      <Cabecalho address={address} porta={bench.detection?.comPort ?? null} />
 
-      <ScrollView contentContainerStyle={estilos.conteudo}>
-        {bancada.fase === 'verificacao' && (
-          <EcranVerificacao bancada={bancada} aoTrocarBancada={aoTrocarBancada} />
+      <ScrollView contentContainerStyle={estilos.content}>
+        {bench.phase === 'verification' && (
+          <VerificationScreen bench={bench} onSwitchBench={onSwitchBench} />
         )}
-        {bancada.fase === 'inserirChip' && <EcranInserirChip bancada={bancada} />}
-        {bancada.fase === 'trabalho' && <EcranTrabalho bancada={bancada} />}
+        {bench.phase === 'insertChip' && <InsertChipScreen bench={bench} />}
+        {bench.phase === 'work' && <WorkScreen bench={bench} />}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Cabecalho({ endereco, porta }: { endereco: string | null; porta?: string | null }) {
+function Cabecalho({ address, porta }: { address: string | null; porta?: string | null }) {
   return (
-    <View style={estilos.cabecalho}>
-      <Text style={estilos.cabecalhoTitulo}>ATMegaPesta — Banca de recuperação</Text>
-      <Text style={estilos.cabecalhoSub}>
-        {endereco === null
+    <View style={estilos.header}>
+      <Text style={estilos.headerTitle}>ATMegaPesta — Banca de recuperação</Text>
+      <Text style={estilos.headerSub}>
+        {address === null
           ? 'Sem bancada escolhida'
-          : `${endereco}${porta ? ` · master em ${porta}` : ''}`}
+          : `${address}${porta ? ` · master em ${porta}` : ''}`}
       </Text>
     </View>
   );

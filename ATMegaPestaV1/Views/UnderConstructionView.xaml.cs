@@ -4,9 +4,9 @@ namespace ATMegaPestaV1.Views;
 
 public partial class UnderConstructionView : UserControl
 {
-    public UnderConstructionView(string titulo)
+    public UnderConstructionView(string title)
     {
         InitializeComponent();
-        TxtTitulo.Text = titulo;
+        TxtTitle.Text = title;
     }
 }

@@ -2,11 +2,12 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 /**
- * O build vai para o wwwroot da API: em produção é a API que serve o React, na mesma
- * origem, e assim não há CORS nem porta separada para quem está à bancada.
+ * The build goes into the API's wwwroot: in production it is the API that serves the React
+ * app, on the same origin, so there is no CORS and no separate port for whoever is at the
+ * bench.
  *
- * Em desenvolvimento o Vite serve na 5173 e encaminha /api e /hub para o Kestrel — o
- * código do front end usa sempre caminhos relativos e não sabe onde a API está.
+ * In development Vite serves on 5173 and forwards /api and /hub to Kestrel — the front end
+ * code always uses relative paths and does not know where the API is.
  */
 export default defineConfig({
   plugins: [react()],

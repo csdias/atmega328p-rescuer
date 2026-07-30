@@ -1,11 +1,11 @@
 /**
- * A lógica da bancada, partilhada pelo front end web e pelo React Native.
+ * The bench logic, shared by the web front end and by React Native.
  *
- * Nada aqui toca no DOM nem em APIs de browser: só `fetch`, WebSocket (através do
- * SignalR) e hooks do React — que existem nos dois lados. É o que permite haver uma
- * cópia só desta lógica em vez de duas a divergir.
+ * Nothing here touches the DOM or any browser API: only `fetch`, WebSocket (through
+ * SignalR) and React hooks — which exist on both sides. That is what allows there to be a
+ * single copy of this logic instead of two drifting apart.
  */
-export * from './contratos';
-export * from './clienteApi';
+export * from './contracts';
+export * from './apiClient';
 export * from './tokens';
-export * from './usarBancada';
+export * from './useBench';

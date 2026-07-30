@@ -1,0 +1,1064 @@
+<UserControl x:Class="ATMegaPestaV1.Views.FunctionalTestsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+
+    <UserControl.Resources>
+        <Style x:Key="ControlButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextTitle}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="{DynamicResource RadiusSmall}" Padding="{TemplateBinding Padding}"
+                                BorderBrush="{DynamicResource BrushBevelRaised}"
+                                BorderThickness="{DynamicResource ButtonThickness}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushBtnDarkHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource BrushBtnDisabledText}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ControlButton}">
+            <Setter Property="Background" Value="{DynamicResource BrushBtnLight}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushBtnLightText}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="{DynamicResource RadiusSmall}" Padding="{TemplateBinding Padding}"
+                                BorderBrush="{DynamicResource BrushBevelRaised}"
+                                BorderThickness="{DynamicResource ButtonThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushBtnLightHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushBtnDisabled}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource BrushBtnDisabledText}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DarkButton" TargetType="Button" BasedOn="{StaticResource ControlButton}">
+            <Setter Property="Background" Value="{DynamicResource BrushBtnDark}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushBtnDarkText}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="{DynamicResource RadiusSmall}" Padding="{TemplateBinding Padding}"
+                                BorderBrush="{DynamicResource BrushBevelRaised}"
+                                BorderThickness="{DynamicResource ButtonThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushBtnDarkHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource BrushBtnDisabled}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource BrushBtnDisabledText}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource DarkButton}">
+            <Setter Property="Background" Value="{DynamicResource BrushError}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushErrorText}"/>
+        </Style>
+
+        <Style x:Key="HelpButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSubtle}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="{DynamicResource RadiusHuge}" BorderBrush="{DynamicResource BrushTextDisabled}" BorderThickness="1.5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource BrushMenuAccent}"/>
+                                <Setter Property="Background" Value="{DynamicResource BrushHighlight}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TestLed" TargetType="Ellipse">
+            <Setter Property="Width" Value="14"/>
+            <Setter Property="Height" Value="14"/>
+            <Setter Property="Fill" Value="{DynamicResource BrushTextSubtle}"/>
+            <Setter Property="Stroke" Value="{DynamicResource BrushTextDisabled}"/>
+            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+
+        <Style x:Key="TestCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BrushCardBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBevelSunken}"/>
+            <Setter Property="BorderThickness" Value="{DynamicResource CardThickness}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource RadiusMedium}"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <!-- Pin map -->
+        <Style x:Key="PinStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BrushPin}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBevelRaised}"/>
+            <Setter Property="BorderThickness" Value="{DynamicResource ButtonThickness}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource RadiusSmall}"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
+            <Setter Property="Padding" Value="7,4"/>
+        </Style>
+        <Style x:Key="PinLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource BrushPinText}"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+        </Style>
+
+        <!-- Peripheral tags -->
+        <Style x:Key="TagStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BrushTag}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBevelRaised}"/>
+            <Setter Property="BorderThickness" Value="{DynamicResource ButtonThickness}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource RadiusHuge}"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+            <Setter Property="Padding" Value="10,4"/>
+        </Style>
+        <Style x:Key="TagLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource BrushTagText}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!-- Badges -->
+        <Style x:Key="BadgePending" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BrushBadge}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource RadiusSmall}"/>
+            <Setter Property="Padding" Value="8,3"/>
+        </Style>
+        <Style x:Key="BadgePass" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BrushSuccess}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource RadiusSmall}"/>
+            <Setter Property="Padding" Value="8,3"/>
+        </Style>
+        <Style x:Key="BadgeFail" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BrushError}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource RadiusSmall}"/>
+            <Setter Property="Padding" Value="8,3"/>
+        </Style>
+        <Style x:Key="BadgeRunning" TargetType="Border">
+            <Setter Property="Background" Value="#1A72C7"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource RadiusSmall}"/>
+            <Setter Property="Padding" Value="8,3"/>
+        </Style>
+
+        <!-- ── Current settings (avrdudess style, read-only) ───────────── -->
+
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+
+        <!-- Accordion header: the whole line toggles the expansion. -->
+        <Style x:Key="AccordionHeader" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="{DynamicResource RadiusSmall}" Padding="2,3">
+                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background"
+                                        Value="{DynamicResource BrushHighlight}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Hexadecimal value box. Not editable: fuses are never written, but it
+             is still a data area — white background and a sunken frame, like the
+             text box it imitates. -->
+        <Style x:Key="FuseBox" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BrushInputBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBevelSunken}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource RadiusTiny}"/>
+            <Setter Property="Padding" Value="9,4"/>
+            <Setter Property="MinWidth" Value="72"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="FuseValue" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextTitle}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="FuseLabel" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextTitle}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="FuseDescription" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextNormal}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="10,0,0,0"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+
+        <!-- Group header, in the manner of the avrdudess GroupBoxes -->
+        <Style x:Key="GroupTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextTitle}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <Style x:Key="GroupBoxStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource BrushSubCardBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrushBevelSunken}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource RadiusMedium}"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Indicador booleano: bolinha + legenda -->
+        <Style x:Key="IndicatorLed" TargetType="Ellipse">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Margin" Value="0,0,7,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Fill" Value="{DynamicResource BrushPinIdle}"/>
+        </Style>
+
+        <Style x:Key="IndicatorText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextTitle}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="MetricValue" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextTitle}"/>
+        </Style>
+
+        <Style x:Key="MetricLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextNormal}"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- ── Screen 1: Welcome ─────────────────────────────────────────── -->
+        <Grid x:Name="StartCheckPanel">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Verificação de Microcontrolador"
+                           Foreground="{DynamicResource BrushTextTitle}" FontSize="20" FontWeight="Bold"
+                           HorizontalAlignment="Center" Margin="0,0,0,24"/>
+                <Button x:Name="BtnStartCheck" Style="{StaticResource PrimaryButton}"
+                        Content="Iniciar Verificação" Padding="32,12"
+                        HorizontalAlignment="Center"
+                        Click="BtnStartCheck_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- ── Screen 2: Insert microcontroller ─────────────────────────── -->
+        <Grid x:Name="InsertChipPanel" Visibility="Collapsed">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="500">
+
+                <!-- Header -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
+                    <TextBlock Text="⚙" FontSize="22" Foreground="{DynamicResource BrushMenuAccent}"
+                               VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <StackPanel>
+                        <TextBlock Text="Inserir Microcontrolador"
+                                   Foreground="{DynamicResource BrushTextTitle}" FontSize="18" FontWeight="Bold"/>
+                        <TextBlock Text="Encaixe o ATmega328P no ZIF socket antes de continuar."
+                                   Foreground="{DynamicResource BrushTextSubtle}" FontSize="12"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Images: empty ZIF → arrow → ZIF inserted -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" CornerRadius="{DynamicResource RadiusLarge}"
+                            Background="{DynamicResource BrushCardBackground}"
+                            BorderBrush="{DynamicResource BrushBevelSunken}" BorderThickness="1">
+                        <StackPanel>
+                            <Image Source="pack://application:,,,/Assets/zif-vazio.jpg"
+                                   Height="130" Stretch="Uniform" Margin="8"/>
+                            <TextBlock Text="ZIF vazio" Foreground="{DynamicResource BrushTextSubtle}"
+                                       FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock x:Name="ArrowIndicator" Grid.Column="1"
+                               Text="▶▶" FontSize="22"
+                               Foreground="{DynamicResource BrushMenuAccent}"
+                               VerticalAlignment="Center" Margin="16,0">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+
+                    <Border Grid.Column="2" CornerRadius="{DynamicResource RadiusLarge}"
+                            Background="{DynamicResource BrushCardBackground}"
+                            BorderBrush="{DynamicResource BrushBevelSunken}" BorderThickness="1">
+                        <StackPanel>
+                            <Image Source="pack://application:,,,/Assets/zif-inserido.jpg"
+                                   Height="130" Stretch="Uniform" Margin="8"/>
+                            <TextBlock Text="Chip inserido ✓" Foreground="{DynamicResource BrushSuccess}"
+                                       FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Warning -->
+                <Border Background="{DynamicResource BrushSubCardBackground}" CornerRadius="{DynamicResource RadiusMedium}"
+                        BorderBrush="{DynamicResource BrushBevelSunken}" BorderThickness="1"
+                        Padding="14,10" Margin="0,0,0,24">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚠" Foreground="{DynamicResource BrushWarning}"
+                                   FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource BrushTextNormal}"
+                                   FontSize="12" VerticalAlignment="Center">
+                            <Run Text="Certifique-se que a alavanca do ZIF está levantada, insira o chip com o "/>
+                            <Run Text="pino 1 no canto marcado" FontWeight="SemiBold"
+                                 Foreground="{DynamicResource BrushWarning}"/>
+                            <Run Text=" e baixe a alavanca para fixar."/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Buttons -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="Cancelar" Width="110" Padding="0,10"
+                            Style="{StaticResource DarkButton}" Margin="0,0,12,0"
+                            Click="BtnInsertChipCancel_Click"/>
+                    <Button Content="Chip inserido — Continuar" Width="220" Padding="0,10"
+                            Style="{StaticResource PrimaryButton}"
+                            Click="BtnInsertChipConfirm_Click"/>
+                </StackPanel>
+
+            </StackPanel>
+        </Grid>
+
+        <!-- Master panel — Recover Microcontroller -->
+        <Grid x:Name="PanelMaster" Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <!-- Width at zero while the integrity check panel is hidden;
+                     ShowIntegrityCheckPanel() puts the 360 px back. -->
+                <ColumnDefinition x:Name="IntegrityCheckColumn" Width="0"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Right-hand panel: integrity check.
+                 Only shown once the integrity check starts.
+                 The content stays in markup so the pin map and the test list are not
+                 lost, but it takes up no space and does not appear before that. -->
+            <Border x:Name="IntegrityCheckResultsPanel" Grid.Column="1"
+                    Visibility="Collapsed"
+                    Background="{DynamicResource BrushHeaderBackground}"
+                    BorderBrush="{DynamicResource BrushSeparator}" BorderThickness="1,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="14,16,14,10">
+                            <TextBlock Text="Verificação de Integridade" Foreground="{DynamicResource BrushTextTitle}"
+                                       FontSize="15" FontWeight="Bold" Margin="0,0,0,12"/>
+                            <Border Background="{DynamicResource BrushSubCardBackground}" CornerRadius="{DynamicResource RadiusLarge}"
+                                    BorderBrush="{DynamicResource BrushBevelSunken}"
+                                    BorderThickness="1" Padding="12,10" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <TextBlock Text="Estado dos pinos GPIO" Foreground="{DynamicResource BrushTextTitle}"
+                                               FontSize="12" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <Border x:Name="PinD0"  Style="{StaticResource PinStyle}"><TextBlock Text="D0"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD1"  Style="{StaticResource PinStyle}"><TextBlock Text="D1"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD2"  Style="{StaticResource PinStyle}"><TextBlock Text="D2"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD3"  Style="{StaticResource PinStyle}"><TextBlock Text="D3"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD4"  Style="{StaticResource PinStyle}"><TextBlock Text="D4"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD5"  Style="{StaticResource PinStyle}"><TextBlock Text="D5"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD6"  Style="{StaticResource PinStyle}"><TextBlock Text="D6"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD7"  Style="{StaticResource PinStyle}"><TextBlock Text="D7"  Style="{StaticResource PinLabel}"/></Border>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <Border x:Name="PinD8"  Style="{StaticResource PinStyle}"><TextBlock Text="D8"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD9"  Style="{StaticResource PinStyle}"><TextBlock Text="D9"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD10" Style="{StaticResource PinStyle}"><TextBlock Text="D10" Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD11" Style="{StaticResource PinStyle}"><TextBlock Text="D11" Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD12" Style="{StaticResource PinStyle}"><TextBlock Text="D12" Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinD13" Style="{StaticResource PinStyle}"><TextBlock Text="D13" Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinA0"  Style="{StaticResource PinStyle}"><TextBlock Text="A0"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinA1"  Style="{StaticResource PinStyle}"><TextBlock Text="A1"  Style="{StaticResource PinLabel}"/></Border>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <Border x:Name="PinA2"  Style="{StaticResource PinStyle}"><TextBlock Text="A2"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinA3"  Style="{StaticResource PinStyle}"><TextBlock Text="A3"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinA4"  Style="{StaticResource PinStyle}"><TextBlock Text="A4"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinA5"  Style="{StaticResource PinStyle}"><TextBlock Text="A5"  Style="{StaticResource PinLabel}"/></Border>
+                                        <Border x:Name="PinRST" Style="{StaticResource PinStyle}"><TextBlock Text="RST" Style="{StaticResource PinLabel}"/></Border>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="8" Height="8" Fill="{DynamicResource BrushPinSuccess}" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                        <TextBlock Text="OK" Foreground="{DynamicResource BrushTextNormal}" FontSize="10" Margin="0,0,8,0"/>
+                                        <Ellipse Width="8" Height="8" Fill="{DynamicResource BrushPinError}" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                        <TextBlock Text="Falha" Foreground="{DynamicResource BrushTextNormal}" FontSize="10" Margin="0,0,8,0"/>
+                                        <Ellipse Width="8" Height="8" Fill="{DynamicResource BrushPinWarning}" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                        <TextBlock Text="Aviso" Foreground="{DynamicResource BrushTextNormal}" FontSize="10" Margin="0,0,8,0"/>
+                                        <Ellipse Width="8" Height="8" Fill="{DynamicResource BrushPinIdle}" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                        <TextBlock Text="Inactivo" Foreground="{DynamicResource BrushTextNormal}" FontSize="10"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="{DynamicResource BrushSubCardBackground}" CornerRadius="{DynamicResource RadiusLarge}"
+                                    BorderBrush="{DynamicResource BrushSeparator}"
+                                    BorderThickness="1" Padding="0,0,0,4" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <Border CornerRadius="{DynamicResource RadiusTop}" Background="{DynamicResource BrushHeaderBackground}" Padding="12,8">
+                                        <StackPanel>
+                                            <Grid Margin="0,0,0,5">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Border x:Name="TagUart" Style="{StaticResource TagStyle}"><TextBlock x:Name="TxtTagUart" Text="UART" Style="{StaticResource TagLabel}"/></Border>
+                                                    <Border x:Name="TagSpi"  Style="{StaticResource TagStyle}"><TextBlock x:Name="TxtTagSpi"  Text="SPI"  Style="{StaticResource TagLabel}"/></Border>
+                                                    <Border x:Name="TagI2c"  Style="{StaticResource TagStyle}"><TextBlock x:Name="TxtTagI2c"  Text="I2C"  Style="{StaticResource TagLabel}"/></Border>
+                                                    <Border x:Name="TagIsp"  Style="{StaticResource TagStyle}"><TextBlock x:Name="TxtTagIsp"  Text="ISP"  Style="{StaticResource TagLabel}"/></Border>
+                                                    <Border x:Name="TagPwm"  Style="{StaticResource TagStyle}"><TextBlock x:Name="TxtTagPwm"  Text="PWM"  Style="{StaticResource TagLabel}"/></Border>
+                                                </StackPanel>
+                                                <TextBlock x:Name="TxtProgressPct" Text="0%"
+                                                           Foreground="{DynamicResource BrushTextSubtle}"
+                                                           FontSize="11" FontWeight="SemiBold"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                            </Grid>
+                                            <Border Background="{DynamicResource BrushCardBackground}" CornerRadius="{DynamicResource RadiusTiny}" Height="4">
+                                                <Border x:Name="ProgressFill" Background="{DynamicResource BrushProgressBar}"
+                                                        CornerRadius="{DynamicResource RadiusTiny}" Height="4" HorizontalAlignment="Left" Width="0"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                    <Grid Margin="12,6,12,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="52"/>
+                                            <ColumnDefinition Width="72"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="1" Text="Teste" Foreground="{DynamicResource BrushTextSubtle}" FontSize="10" FontWeight="SemiBold"/>
+                                        <TextBlock Grid.Column="2" Text="Tempo" Foreground="{DynamicResource BrushTextSubtle}" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                        <TextBlock Grid.Column="3" Text="Estado" Foreground="{DynamicResource BrushTextSubtle}" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                    </Grid>
+                                    <Border Height="1" Background="{DynamicResource BrushSeparator}"/>
+                                    <Grid Margin="12,7,12,7">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/><ColumnDefinition Width="72"/></Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="IcoUart" Text="—" Foreground="{DynamicResource BrushBadgeText}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="UART echo" Foreground="{DynamicResource BrushTextTitle}" FontSize="12" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" x:Name="TxtUartTime" Text="—" Foreground="{DynamicResource BrushTextSubtle}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        <Border Grid.Column="3" x:Name="BadgeUart" Style="{StaticResource BadgePending}" HorizontalAlignment="Center"><TextBlock Text="Pendente" Foreground="{DynamicResource BrushBadgeText}" FontSize="10" FontWeight="SemiBold"/></Border>
+                                    </Grid>
+                                    <Border Height="1" Background="{DynamicResource BrushSeparator}" Opacity="0.5"/>
+                                    <Grid Margin="12,7,12,7">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/><ColumnDefinition Width="72"/></Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="IcoGpioWrite" Text="—" Foreground="{DynamicResource BrushBadgeText}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="GPIO escrita" Foreground="{DynamicResource BrushTextTitle}" FontSize="12" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" x:Name="TxtGpioWriteTime" Text="—" Foreground="{DynamicResource BrushTextSubtle}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        <Border Grid.Column="3" x:Name="BadgeGpioWrite" Style="{StaticResource BadgePending}" HorizontalAlignment="Center"><TextBlock Text="Pendente" Foreground="{DynamicResource BrushBadgeText}" FontSize="10" FontWeight="SemiBold"/></Border>
+                                    </Grid>
+                                    <Border Height="1" Background="{DynamicResource BrushSeparator}" Opacity="0.5"/>
+                                    <Grid Margin="12,7,12,7">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/><ColumnDefinition Width="72"/></Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="IcoGpioRead" Text="—" Foreground="{DynamicResource BrushBadgeText}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="GPIO leitura" Foreground="{DynamicResource BrushTextTitle}" FontSize="12" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" x:Name="TxtGpioReadTime" Text="—" Foreground="{DynamicResource BrushTextSubtle}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        <Border Grid.Column="3" x:Name="BadgeGpioRead" Style="{StaticResource BadgePending}" HorizontalAlignment="Center"><TextBlock Text="Pendente" Foreground="{DynamicResource BrushBadgeText}" FontSize="10" FontWeight="SemiBold"/></Border>
+                                    </Grid>
+                                    <Border Height="1" Background="{DynamicResource BrushSeparator}" Opacity="0.5"/>
+                                    <Grid Margin="12,7,12,7">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/><ColumnDefinition Width="72"/></Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="IcoSpi" Text="—" Foreground="{DynamicResource BrushBadgeText}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="SPI loopback" Foreground="{DynamicResource BrushTextTitle}" FontSize="12" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" x:Name="TxtSpiTime" Text="—" Foreground="{DynamicResource BrushTextSubtle}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        <Border Grid.Column="3" x:Name="BadgeSpi" Style="{StaticResource BadgePending}" HorizontalAlignment="Center"><TextBlock Text="Pendente" Foreground="{DynamicResource BrushBadgeText}" FontSize="10" FontWeight="SemiBold"/></Border>
+                                    </Grid>
+                                    <Border Height="1" Background="{DynamicResource BrushSeparator}" Opacity="0.5"/>
+                                    <Grid Margin="12,7,12,7">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/><ColumnDefinition Width="72"/></Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="IcoI2c" Text="—" Foreground="{DynamicResource BrushBadgeText}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="I2C scan" Foreground="{DynamicResource BrushTextTitle}" FontSize="12" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" x:Name="TxtI2cTime" Text="—" Foreground="{DynamicResource BrushTextSubtle}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        <Border Grid.Column="3" x:Name="BadgeI2c" Style="{StaticResource BadgePending}" HorizontalAlignment="Center"><TextBlock Text="Pendente" Foreground="{DynamicResource BrushBadgeText}" FontSize="10" FontWeight="SemiBold"/></Border>
+                                    </Grid>
+                                    <Border Height="1" Background="{DynamicResource BrushSeparator}" Opacity="0.5"/>
+                                    <Grid Margin="12,7,12,7">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/><ColumnDefinition Width="72"/></Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="IcoAdc" Text="—" Foreground="{DynamicResource BrushBadgeText}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="ADC canal 0" Foreground="{DynamicResource BrushTextTitle}" FontSize="12" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" x:Name="TxtAdcTime" Text="—" Foreground="{DynamicResource BrushTextSubtle}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        <Border Grid.Column="3" x:Name="BadgeAdc" Style="{StaticResource BadgePending}" HorizontalAlignment="Center"><TextBlock Text="Pendente" Foreground="{DynamicResource BrushBadgeText}" FontSize="10" FontWeight="SemiBold"/></Border>
+                                    </Grid>
+                                    <Border Height="1" Background="{DynamicResource BrushSeparator}" Opacity="0.5"/>
+                                    <Grid Margin="12,7,12,7">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/><ColumnDefinition Width="52"/><ColumnDefinition Width="72"/></Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="IcoPwm" Text="—" Foreground="{DynamicResource BrushBadgeText}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="PWM duty" Foreground="{DynamicResource BrushTextTitle}" FontSize="12" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" x:Name="TxtPwmTime" Text="—" Foreground="{DynamicResource BrushTextSubtle}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        <Border Grid.Column="3" x:Name="BadgePwm" Style="{StaticResource BadgePending}" HorizontalAlignment="Center"><TextBlock Text="Pendente" Foreground="{DynamicResource BrushBadgeText}" FontSize="10" FontWeight="SemiBold"/></Border>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                            <StackPanel Margin="0,0,0,4">
+                                <TextBlock Text="Último resultado" Foreground="{DynamicResource BrushTextSubtle}" FontSize="11" Margin="0,0,0,4"/>
+                                <TextBlock x:Name="TxtLastResult" Text="—" Foreground="{DynamicResource BrushTextNormal}"
+                                           FontSize="12" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Border Grid.Row="1" Background="{DynamicResource BrushHeaderBackground}"
+                            BorderBrush="{DynamicResource BrushSeparator}" BorderThickness="0,1,0,0"
+                            Padding="12,10">
+                        <StackPanel>
+                            <!-- Row 1: Start/Re-run + Export log -->
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="6"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="BtnStartAll" Grid.Column="0"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Content="Iniciar" Padding="0,9"
+                                        Click="BtnStartAll_Click"/>
+                                <Button x:Name="BtnExportLog" Grid.Column="2"
+                                        Style="{StaticResource ControlButton}"
+                                        Background="{DynamicResource BrushCardBackground}"
+                                        HorizontalContentAlignment="Center"
+                                        Content="Exportar log" Padding="0,9"
+                                        IsEnabled="False" Click="BtnExportLog_Click"/>
+                            </Grid>
+                            <!-- Row 2: Stop — only visible while running -->
+                            <Button x:Name="BtnStop"
+                                    Style="{StaticResource DangerButton}"
+                                    Content="⏹  Parar execução" Padding="0,9"
+                                    Visibility="Collapsed"
+                                    Click="BtnStop_Click"/>
+                            <!-- Retest failures — only visible if there are failures -->
+                            <Button x:Name="BtnRetestFailures"
+                                    Style="{StaticResource ControlButton}"
+                                    Background="{DynamicResource BrushCardBackground}"
+                                    HorizontalContentAlignment="Center"
+                                    Content="Re-testar falhas" Padding="0,9"
+                                    Visibility="Collapsed" Margin="0,6,0,0"
+                                    Click="BtnRetestFailures_Click"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Left-hand panel: recovery sequence -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <StackPanel Grid.Row="0" Margin="20,20,20,10">
+                    <TextBlock Text="Recuperação de Microcontrolador"
+                               Foreground="{DynamicResource BrushTextTitle}" FontSize="18" FontWeight="Bold" Margin="0,0,0,3"/>
+                    <TextBlock Text="Leitura das configurações do chip-alvo e verificação de integridade"
+                               Foreground="{DynamicResource BrushTextSubtle}" FontSize="12"/>
+                </StackPanel>
+
+                <!-- Steps in a ScrollViewer -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,0">
+                    <StackPanel Margin="20,0,20,12">
+
+                        <!-- ══ Current settings ═════════════════════════════════
+                             Merges what used to be the "Enable USBAsp" and "Logic
+                             check" steps: switches the bus and shows what the target
+                             chip reports. Strictly a read — there is no fuse writing
+                             anywhere in the app. -->
+                        <Border Background="{DynamicResource BrushCardBackground}" CornerRadius="{DynamicResource RadiusMedium}"
+                                BorderBrush="{DynamicResource BrushBevelSunken}" BorderThickness="1"
+                                Padding="14,12" Margin="0,0,0,6">
+                            <StackPanel>
+
+                                <!-- Accordion header: always visible, even collapsed.
+                                     The whole line toggles the expansion. -->
+                                    <ToggleButton x:Name="ToggleConfigDetails"
+                                                  Style="{StaticResource AccordionHeader}"
+                                                  IsChecked="True"
+                                                  ToolTip="Mostrar ou esconder os detalhes">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="28"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!-- 6 px margin: the LED stays where it was when it
+                                                 had the 22 px frame around it. -->
+                                            <Ellipse x:Name="LedConfig" Width="10" Height="10"
+                                                     Fill="{DynamicResource BrushPinIdle}"
+                                                     HorizontalAlignment="Left" VerticalAlignment="Center"
+                                                     Margin="6,0,0,0"/>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="Configurações atuais"
+                                                           Foreground="{DynamicResource BrushTextTitle}"
+                                                           FontSize="14" FontWeight="SemiBold"/>
+                                                <TextBlock x:Name="TxtConfigState" Text="—"
+                                                           Foreground="{DynamicResource BrushTextNormal}"
+                                                           FontSize="12.5" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2" FontSize="11.5" Margin="10,0,4,0"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource BrushTextNormal}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="▼"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsChecked, ElementName=ToggleConfigDetails}"
+                                                                         Value="False">
+                                                                <Setter Property="Text" Value="►"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </ToggleButton>
+
+                                <!-- Accordion body -->
+                                <StackPanel x:Name="ConfigDetailsPanel" Margin="0,12,0,0"
+                                            Visibility="{Binding IsChecked, ElementName=ToggleConfigDetails,
+                                                                 Converter={StaticResource BoolToVisibility}}">
+
+                                <!-- ── Read failure ──────────────────────────────
+                                     Takes the place of the data cards: if nothing was
+                                     read, showing empty fields is just noise and the
+                                     indicators go as far as asserting the opposite of
+                                     the fault. Here there is a message and an action. -->
+                                <Border x:Name="ReadFailurePanel" Visibility="Collapsed"
+                                        Background="{DynamicResource BrushSubCardBackground}"
+                                        BorderBrush="{DynamicResource BrushError}" BorderThickness="1"
+                                        CornerRadius="{DynamicResource RadiusMedium}" Padding="24,22" Margin="0,0,0,8">
+                                    <StackPanel HorizontalAlignment="Center" MaxWidth="560">
+                                        <TextBlock Text="⚠" FontSize="32" HorizontalAlignment="Center"
+                                                   Foreground="{DynamicResource BrushPinError}"
+                                                   Margin="0,0,0,10"/>
+                                        <TextBlock Text="Não foi possível efetuar a leitura"
+                                                   FontSize="20" FontWeight="Bold"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource BrushTextTitle}"/>
+                                        <TextBlock x:Name="TxtFailureInstruction"
+                                                   FontSize="13.5" TextWrapping="Wrap" TextAlignment="Center"
+                                                   LineHeight="21" Margin="0,12,0,0"
+                                                   Foreground="{DynamicResource BrushTextNormal}"
+                                                   Text="Verifique se o microcontrolador está corretamente inserido no ZIF socket — alavanca baixada e pino 1 no canto marcado — e tente detetar novamente."/>
+                                        <TextBlock x:Name="TxtFailureAttempts"
+                                                   FontSize="12.5" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextWrapping="Wrap" Margin="0,16,0,0"
+                                                   Foreground="{DynamicResource BrushTextSubtle}"/>
+                                        <Button x:Name="BtnRetry"
+                                                Style="{StaticResource PrimaryButton}"
+                                                Content="Detetar novamente" FontSize="13"
+                                                Width="200" Padding="0,10"
+                                                HorizontalAlignment="Center" Margin="0,16,0,0"
+                                                Click="BtnRetry_Click"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Data cards: they only make sense with a valid read -->
+                                <StackPanel x:Name="ReadDataPanel">
+
+                                <!-- MCU on the left, fuses on the right — the window opens
+                                     maximised, there is width to spare for both side by side. -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" MinWidth="280"/>
+                                        <ColumnDefinition Width="14"/>
+                                        <ColumnDefinition Width="*" MinWidth="320"/>
+                                    </Grid.ColumnDefinitions>
+
+                                <!-- ── MCU group ─────────────────────────────── -->
+                                <Border Grid.Column="0" Style="{StaticResource GroupBoxStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="MCU" Style="{StaticResource GroupTitle}"/>
+
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock x:Name="TxtMcuName" Text="—"
+                                                       Foreground="{DynamicResource BrushTextTitle}"
+                                                       FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <Border Grid.Column="1" x:Name="BadgeMcuState"
+                                                    Style="{StaticResource BadgePending}"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock x:Name="TxtMcuState" Text="A aguardar"
+                                                           Foreground="{DynamicResource BrushBadgeText}"
+                                                           FontSize="11.5" FontWeight="SemiBold"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Signature + memories -->
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" Margin="0,0,26,0">
+                                                <TextBlock Text="Assinatura" Style="{StaticResource MetricLabel}"/>
+                                                <TextBlock x:Name="TxtMcuSignature" Text="—"
+                                                           Style="{StaticResource MetricValue}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Margin="0,0,26,0">
+                                                <TextBlock Text="Flash" Style="{StaticResource MetricLabel}"/>
+                                                <TextBlock x:Name="TxtMcuFlash" Text="—"
+                                                           Style="{StaticResource MetricValue}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" Margin="0,0,26,0">
+                                                <TextBlock Text="EEPROM" Style="{StaticResource MetricLabel}"/>
+                                                <TextBlock x:Name="TxtMcuEeprom" Text="—"
+                                                           Style="{StaticResource MetricValue}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="3">
+                                                <TextBlock Text="SRAM" Style="{StaticResource MetricLabel}"/>
+                                                <TextBlock x:Name="TxtMcuSram" Text="—"
+                                                           Style="{StaticResource MetricValue}"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Flash map: application space vs bootloader -->
+                                        <Grid Margin="0,0,0,5">
+                                            <TextBlock Text="Mapa da Flash" Style="{StaticResource MetricLabel}"/>
+                                            <TextBlock x:Name="TxtFlashTotal" Text="—"
+                                                       HorizontalAlignment="Right"
+                                                       Style="{StaticResource MetricLabel}"/>
+                                        </Grid>
+                                        <Border CornerRadius="{DynamicResource RadiusTiny}" ClipToBounds="True" Height="14"
+                                                BorderBrush="{DynamicResource BrushBevelSunken}" BorderThickness="1"
+                                                Background="{DynamicResource BrushProgressBg}" Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition x:Name="ColFlashApp"  Width="1*"/>
+                                                    <ColumnDefinition x:Name="ColFlashBoot" Width="0*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border x:Name="FlashAppBar" Grid.Column="0"
+                                                        Background="{DynamicResource BrushPinIdle}"/>
+                                                <Border x:Name="FlashBootBar" Grid.Column="1"
+                                                        Background="{DynamicResource BrushWarning}"/>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Legend: colour swatch, what it is, how many bytes and what slice of the total -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Row 1 — application space -->
+                                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal"
+                                                        Margin="0,0,12,3">
+                                                <Border x:Name="ChipFlashApp" Width="11" Height="11" CornerRadius="{DynamicResource RadiusTiny}"
+                                                        Background="{DynamicResource BrushPinIdle}"
+                                                        VerticalAlignment="Center" Margin="0,0,7,0"/>
+                                                <TextBlock Text="Disponível para a aplicação"
+                                                           Style="{StaticResource IndicatorText}"
+                                                           ToolTip="Flash que sobra para o programa depois de reservado o bootloader. A app não lê o conteúdo da Flash, por isso isto é capacidade, não ocupação."/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtFlashAppBytes" Text="—"
+                                                       Style="{StaticResource MetricValue}" Margin="0,0,14,3"
+                                                       HorizontalAlignment="Right"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="2" x:Name="TxtFlashAppPct" Text="—"
+                                                       Style="{StaticResource MetricValue}" Margin="0,0,0,3"
+                                                       HorizontalAlignment="Right" MinWidth="52"/>
+
+                                            <!-- Row 2 — bootloader (hidden if there is none) -->
+                                            <StackPanel Grid.Row="1" Grid.Column="0" x:Name="BootLegendPanel"
+                                                        Orientation="Horizontal" Margin="0,0,12,0">
+                                                <Border x:Name="ChipFlashBoot" Width="11" Height="11" CornerRadius="{DynamicResource RadiusTiny}"
+                                                        Background="{DynamicResource BrushWarning}"
+                                                        VerticalAlignment="Center" Margin="0,0,7,0"/>
+                                                <TextBlock x:Name="TxtBootLegend" Text="Bootloader (reservado)"
+                                                           Style="{StaticResource IndicatorText}"
+                                                           ToolTip="Topo da Flash reservado pelos fuses BOOTSZ. Um chip erase por ISP apaga-o e devolve a Flash toda à aplicação."/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtFlashBootBytes" Text="—"
+                                                       Style="{StaticResource MetricValue}" Margin="0,0,14,0"
+                                                       HorizontalAlignment="Right"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="2" x:Name="TxtFlashBootPct" Text="—"
+                                                       Style="{StaticResource MetricValue}" Margin="0"
+                                                       HorizontalAlignment="Right" MinWidth="52"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- ── Fuses & lock bits group ───────────────── -->
+                                <Border Grid.Column="2" Style="{StaticResource GroupBoxStyle}">
+                                    <StackPanel>
+                                        <Grid Margin="0,0,0,8">
+                                            <TextBlock Text="Fuses &amp; lock bits" Style="{StaticResource GroupTitle}" Margin="0"/>
+                                            <TextBlock Text="só leitura" HorizontalAlignment="Right"
+                                                       Foreground="{DynamicResource BrushTextNormal}" FontSize="11.5"
+                                                       ToolTip="A app nunca grava fuses — todas as operações são de leitura."/>
+                                        </Grid>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="L" Style="{StaticResource FuseLabel}"/>
+                                            <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource FuseBox}" Margin="0,0,0,5">
+                                                <TextBlock x:Name="TxtFuseL" Text="—" Style="{StaticResource FuseValue}"/>
+                                            </Border>
+                                            <TextBlock Grid.Row="0" Grid.Column="2" x:Name="TxtFuseLDesc" Text="—"
+                                                       Style="{StaticResource FuseDescription}"/>
+
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="H" Style="{StaticResource FuseLabel}"/>
+                                            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource FuseBox}" Margin="0,0,0,5">
+                                                <TextBlock x:Name="TxtFuseH" Text="—" Style="{StaticResource FuseValue}"/>
+                                            </Border>
+                                            <TextBlock Grid.Row="1" Grid.Column="2" x:Name="TxtFuseHDesc" Text="—"
+                                                       Style="{StaticResource FuseDescription}"/>
+
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="E" Style="{StaticResource FuseLabel}"/>
+                                            <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource FuseBox}" Margin="0,0,0,5">
+                                                <TextBlock x:Name="TxtFuseE" Text="—" Style="{StaticResource FuseValue}"/>
+                                            </Border>
+                                            <TextBlock Grid.Row="2" Grid.Column="2" x:Name="TxtFuseEDesc" Text="—"
+                                                       Style="{StaticResource FuseDescription}"/>
+
+                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="LB" Style="{StaticResource FuseLabel}"/>
+                                            <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource FuseBox}">
+                                                <TextBlock x:Name="TxtFuseLB" Text="—" Style="{StaticResource FuseValue}"/>
+                                            </Border>
+                                            <TextBlock Grid.Row="3" Grid.Column="2" x:Name="TxtFuseLBDesc" Text="—"
+                                                       Style="{StaticResource FuseDescription}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                </Grid>
+                                <!-- end of the MCU | Fuses row -->
+
+                                <!-- ── Indicators group ──────────────────────── -->
+                                <Border Style="{StaticResource GroupBoxStyle}" Margin="0,0,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="Indicadores" Style="{StaticResource GroupTitle}"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,5">
+                                                <Ellipse x:Name="LedIndIsp" Style="{StaticResource IndicatorLed}"/>
+                                                <TextBlock x:Name="TxtIndIsp" Text="ISP habilitado"
+                                                           Style="{StaticResource IndicatorText}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,5">
+                                                <Ellipse x:Name="LedIndReset" Style="{StaticResource IndicatorLed}"/>
+                                                <TextBlock x:Name="TxtIndReset" Text="Pino RESET activo"
+                                                           Style="{StaticResource IndicatorText}"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,5">
+                                                <Ellipse x:Name="LedIndClock" Style="{StaticResource IndicatorLed}"/>
+                                                <TextBlock x:Name="TxtIndClock" Text="Clock a full speed"
+                                                           Style="{StaticResource IndicatorText}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,5">
+                                                <Ellipse x:Name="LedIndBod" Style="{StaticResource IndicatorLed}"/>
+                                                <TextBlock x:Name="TxtIndBod" Text="Brown-out"
+                                                           Style="{StaticResource IndicatorText}"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                                                <Ellipse x:Name="LedIndBootloader" Style="{StaticResource IndicatorLed}"/>
+                                                <TextBlock x:Name="TxtIndBootloader" Text="Bootloader"
+                                                           Style="{StaticResource IndicatorText}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                                                <Ellipse x:Name="LedIndEeprom" Style="{StaticResource IndicatorLed}"/>
+                                                <TextBlock x:Name="TxtIndEeprom" Text="EEPROM em chip erase"
+                                                           Style="{StaticResource IndicatorText}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                </StackPanel>
+                                <!-- end of the data cards -->
+
+                                <!-- avrdude raw output — only appears when something fails.
+                                     It is a console, not a panel: data-area background so the
+                                     monospaced text reads as a program output. -->
+                                <Border x:Name="ConfigErrorPanel" Visibility="Collapsed"
+                                        Background="{DynamicResource BrushInputBackground}"
+                                        BorderBrush="{DynamicResource BrushError}" BorderThickness="1"
+                                        CornerRadius="{DynamicResource RadiusMedium}" Padding="10,8" Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="Saída do avrdude" Style="{StaticResource GroupTitle}" Margin="0,0,0,4"/>
+                                        <TextBlock x:Name="TxtConfigOutput" Text="—" FontFamily="Consolas"
+                                                   FontSize="11.5" TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource BrushTextTitle}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                </StackPanel>
+                                <!-- end of the accordion body -->
+
+                                <!-- The primary action of the card. It sits outside the accordion
+                                     body so it stays reachable when collapsed; right-aligned
+                                     it lines up with the margin of the grey panels, which
+                                     stretch to the full width of the card. -->
+                                <Button x:Name="BtnDetectConfig"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Content="Detetar" FontSize="12.5"
+                                        Width="140" Padding="0,8"
+                                        HorizontalAlignment="Right" Margin="0,8,0,0"
+                                        IsEnabled="False"
+                                        ToolTip="Lê a assinatura e os fuses do chip-alvo e volta a isolar o barramento (só leitura)"
+                                        Click="BtnDetectConfig_Click"/>
+
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ══ Next step ════════════════════════════════════════
+                             Union of what used to be the "Enable ATmega2560" and
+                             "Integrity check" steps: switching the bus over to the
+                             master is not a step with value of its own — it only
+                             serves the check that comes next, and so they are a
+                             single gesture.
+
+                             Hidden until the settings read passes: without knowing
+                             which part is in the ZIF there is nothing to check. -->
+                        <Border x:Name="IntegrityCheckCard" Visibility="Collapsed"
+                                Background="{DynamicResource BrushCardBackground}" CornerRadius="{DynamicResource RadiusMedium}"
+                                BorderBrush="{DynamicResource BrushBevelSunken}" BorderThickness="1"
+                                Padding="14,12" Margin="0,0,0,6">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse x:Name="LedIntegrityCheck" Width="10" Height="10"
+                                             Fill="{DynamicResource BrushPinIdle}"
+                                             HorizontalAlignment="Left" VerticalAlignment="Center"
+                                             Margin="6,0,0,0"/>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Verificação de Integridade"
+                                                   Foreground="{DynamicResource BrushTextTitle}"
+                                                   FontSize="14" FontWeight="SemiBold"/>
+                                        <TextBlock x:Name="TxtIntegrityCheck"
+                                                   Text="Comuta o barramento para o ATmega2560 e exercita os pinos do chip-alvo."
+                                                   Foreground="{DynamicResource BrushTextNormal}"
+                                                   FontSize="12.5" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+                                <Button x:Name="BtnIntegrityCheck"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Content="Iniciar" FontSize="12.5"
+                                        Width="140" Padding="0,8"
+                                        HorizontalAlignment="Right" Margin="0,10,0,0"
+                                        ToolTip="Activa o ATmega2560 no barramento e corre a verificação de integridade"
+                                        Click="BtnIntegrityCheck_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+
+    </Grid>
+</UserControl>
