@@ -1,0 +1,104 @@
+<Window x:Class="ATMegaPestaV1.Views.TransferenciaVerificadorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Transferência do verificador"
+        SizeToContent="Height" Width="560"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource BrushFundoCard}"
+        FontFamily="{DynamicResource FonteUI}">
+
+    <Window.Resources>
+        <Style x:Key="DialogButton" TargetType="Button">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="{DynamicResource BrushBtnEscuro}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushBtnEscuroText}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="{DynamicResource RaioPequeno}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush"
+                                        Value="{DynamicResource BrushMenuAccento}"/>
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DialogButtonPrimario" TargetType="Button" BasedOn="{StaticResource DialogButton}">
+            <Setter Property="Background" Value="{DynamicResource BrushBtnClaro}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushBtnClaroText}"/>
+        </Style>
+
+        <Style x:Key="Paragrafo" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="21"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextoNormal}"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+    </Window.Resources>
+
+    <StackPanel Margin="28,26">
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
+            <TextBlock Text="⚠" FontSize="26" VerticalAlignment="Center"
+                       Foreground="{DynamicResource BrushPinAviso}" Margin="0,0,10,0"/>
+            <TextBlock Text="É necessário programar o microcontrolador"
+                       FontSize="17" FontWeight="Bold" VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource BrushTextoTitulo}"/>
+        </StackPanel>
+
+        <TextBlock Style="{StaticResource Paragrafo}"
+                   Text="A verificação de integridade não se faz por leitura. Para se poder exercitar os pinos, o ATmega328P tem de correr uma aplicação verificadora, que é transferida para a sua memória Flash através do USBAsp."/>
+
+        <!-- A consequência é o que decide a resposta: fica destacada, não escondida
+             no meio do parágrafo. -->
+        <Border Background="{DynamicResource BrushFundoSubCard}"
+                BorderBrush="{DynamicResource BrushPinAviso}" BorderThickness="1"
+                CornerRadius="{DynamicResource RaioMedio}" Padding="14,11" Margin="0,0,0,14">
+            <TextBlock FontSize="13.5" TextWrapping="Wrap" LineHeight="21"
+                       Foreground="{DynamicResource BrushTextoTitulo}">
+                <Run Text="Essa transferência substitui o programa que o seu microcontrolador tem agora"
+                     FontWeight="SemiBold"/>
+                <Run Text=" e pode apagar os dados guardados na EEPROM. Não há como desfazer."/>
+            </TextBlock>
+        </Border>
+
+        <TextBlock Style="{StaticResource Paragrafo}"
+                   Text="Antes de prosseguir pode guardar no computador uma cópia da Flash e da EEPROM do seu microcontrolador. É a única forma de mais tarde repor o que lá está hoje."/>
+
+        <TextBlock Style="{StaticResource Paragrafo}" Margin="0,0,0,0"
+                   FontWeight="SemiBold" Foreground="{DynamicResource BrushTextoTitulo}"
+                   Text="Deseja prosseguir?"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,22,0,0">
+            <Button x:Name="BtnComCopia" Style="{StaticResource DialogButtonPrimario}"
+                    Content="Guardar cópia e prosseguir" IsDefault="True" Margin="0,0,10,0"
+                    Click="BtnComCopia_Click"/>
+            <Button x:Name="BtnSemCopia" Style="{StaticResource DialogButton}"
+                    Content="Prosseguir sem cópia" Margin="0,0,10,0"
+                    Click="BtnSemCopia_Click"/>
+            <Button x:Name="BtnCancelar" Style="{StaticResource DialogButton}"
+                    Content="Cancelar" IsCancel="True"
+                    Click="BtnCancelar_Click"/>
+        </StackPanel>
+
+    </StackPanel>
+</Window>

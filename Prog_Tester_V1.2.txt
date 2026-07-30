@@ -1,0 +1,226 @@
+#include <SPI.h>
+
+/*
+ * Sistema de recuperação de uC - ARDUINO MEGA (MASTER)
+ * Versão otimizada com seleção por Menu Numérico (Switch Case)
+ * Funções Atuais: Assinatura; Ativar USBasp; Ativar Mega Master; Isolar Barramento; Testar Serial2; Executar Teste SPI;
+ */
+
+const int PIN_CONTROL_USBASP = 49; 
+const int PIN_CONTROL_MASTER = 48; 
+
+const int MEGA_MISO = 50;
+const int MEGA_MOSI = 51;
+const int MEGA_SCK  = 52;
+const int MEGA_SS   = 53;
+
+// Declaração de funções
+void exibirMenu();
+void exibirAssinatura();
+void ativarUSBasp();
+void ativarMegaMaster();
+void cancelarAcesso();
+void desativarPinosSPIMaster();
+void ativarPinosSPIMaster();
+void testarConexaoNano();
+void executarSpiTest();
+
+void setup() {
+  pinMode(PIN_CONTROL_USBASP, OUTPUT);
+  pinMode(PIN_CONTROL_MASTER, OUTPUT);
+
+  cancelarAcesso(); // Estado inicial seguro em Hi-Z
+
+  Serial.begin(9600);   
+  Serial2.begin(9600);  
+  
+  SPI.begin();
+  SPI.setClockDivider(SPI_CLOCK_DIV16); 
+  
+  while (!Serial); 
+  exibirMenu();
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    // Lê o número ou carater introduzido
+    char opcao = Serial.read();
+
+    // Ignora caracteres de mudança de linha / retorno de carro (Enter)
+    if (opcao == '\n' || opcao == '\r') return;
+
+    Serial.println(opcao); // Echo do número digitado no Monitor Série
+
+    // Estrutura de Controlo por Seleção Numérica
+    switch (opcao) {
+      case '1':
+        exibirAssinatura();
+        break;
+
+      case '2':
+        ativarUSBasp();
+        break;
+
+      case '3':
+        ativarMegaMaster();
+        break;
+
+      case '4':
+        cancelarAcesso();
+        Serial.println(F("\n[SISTEMA] Barramento totalmente isolado."));
+        break;
+
+      case '5':
+        testarConexaoNano();
+        break;
+
+      case '6':
+        executarSpiTest();
+        break;
+
+      default:
+        Serial.println(F("\n[ERRO] Opcao invalida! Escolha um numero de 1 a 6."));
+        break;
+    }
+
+    // Limpa eventuais caracteres restantes no buffer da Serial0
+    while (Serial.available() > 0) Serial.read();
+
+    delay(200);
+    exibirMenu();
+  }
+}
+
+// -------------------------------------------------------------------
+// FUNÇÕES DE OPERAÇÃO E DIAGNÓSTICO
+// -------------------------------------------------------------------
+
+void exibirAssinatura() {
+  Serial.println(F("ATmega2560_Pro_ON"));
+}
+
+void executarSpiTest() {
+  Serial.println(F("\n[SPI TEST] Iniciando sequencia..."));
+  
+  // Limpa o buffer de receção da Serial2
+  while (Serial2.available() > 0) Serial2.read(); 
+  delay(100); 
+  
+  // Envia comando de sincronização
+  Serial2.println("SPI_TEST");
+  
+  unsigned long timeout = millis();
+  bool pronto = false;
+
+  // Aguarda confirmação COM_SET do Nano (timeout: 3s)
+  while (millis() - timeout < 3000) {
+    if (Serial2.available() > 0) {
+      String resp = Serial2.readStringUntil('\n');
+      resp.trim();
+      if (resp == "COM_SET") { pronto = true; break; }
+    }
+  }
+
+  if (!pronto) {
+    Serial.println(F("[ERRO] Nano nao confirmou COM_SET. Tente novamente."));
+    return;
+  }
+
+  ativarMegaMaster(); 
+  delay(200);
+
+  digitalWrite(MEGA_SS, LOW); 
+  delay(10); 
+  
+  // Envia "LISTEN\n" via SPI
+  const char* msg = "LISTEN\n";
+  for (size_t i = 0; i < strlen(msg); i++) {
+    SPI.transfer(msg[i]);
+    delay(2);
+  }
+  
+  // Lê a resposta enviando dummy bytes (0x00)
+  String respostaSpi = "";
+  for (int i = 0; i < 40; i++) {
+    char c = SPI.transfer(0x00); 
+    if (c != 0 && (byte)c != 255 && c != '\r') {
+      respostaSpi += c;
+    }
+    delay(5);
+  }
+
+  digitalWrite(MEGA_SS, HIGH); 
+  
+  if (respostaSpi.indexOf("NANO_SPI_OK") >= 0) {
+    Serial.println(F("\n*******************************"));
+    Serial.println(F("*  COMUNICACAO BEM SUCEDIDA!  *"));
+    Serial.println(F("*******************************"));
+  } else {
+    Serial.print(F("[SPI RESULTADO INCOMPLETO]: "));
+    Serial.println(respostaSpi);
+  }
+}
+
+void cancelarAcesso() {
+  digitalWrite(PIN_CONTROL_USBASP, LOW);
+  digitalWrite(PIN_CONTROL_MASTER, LOW);
+  desativarPinosSPIMaster();
+}
+
+void ativarUSBasp() {
+  digitalWrite(PIN_CONTROL_MASTER, LOW);
+  desativarPinosSPIMaster();
+  delay(50);
+  digitalWrite(PIN_CONTROL_USBASP, HIGH);
+  Serial.println(F("\n[MODO] USBasp Ativo."));
+}
+
+void ativarMegaMaster() {
+  digitalWrite(PIN_CONTROL_USBASP, LOW);
+  delay(50);
+  ativarPinosSPIMaster();
+  digitalWrite(PIN_CONTROL_MASTER, HIGH);
+  Serial.println(F("\n[MODO] Mega como MASTER."));
+}
+
+void desativarPinosSPIMaster() {
+  pinMode(MEGA_MOSI, INPUT);
+  pinMode(MEGA_MISO, INPUT);
+  pinMode(MEGA_SCK, INPUT);
+  pinMode(MEGA_SS, INPUT); 
+}
+
+void ativarPinosSPIMaster() {
+  pinMode(MEGA_MOSI, OUTPUT);
+  pinMode(MEGA_SCK, OUTPUT);
+  pinMode(MEGA_SS, OUTPUT);
+  pinMode(MEGA_MISO, INPUT);
+}
+
+void testarConexaoNano() {
+  while (Serial2.available() > 0) Serial2.read(); 
+  Serial2.println("LISTEN");
+
+  unsigned long t = millis();
+  while (millis() - t < 1000) {
+    if (Serial2.available() > 0) {
+      Serial.println("[NANO]: " + Serial2.readStringUntil('\n'));
+      return;
+    }
+  }
+  Serial.println(F("[ERRO] Serial 2 offline."));
+}
+
+void exibirMenu() {
+  Serial.println(F("\n================================="));
+  Serial.println(F("      MEGA PRO MINI Tester       "));
+  Serial.println(F("================================="));
+  Serial.println(F(" 1) Assinatura"));
+  Serial.println(F(" 2) Ativar USBasp (Ativar USBASP_SPI)"));
+  Serial.println(F(" 3) Ativar Mega (Ativar uC_MASTER_SPI)"));
+  Serial.println(F(" 4) Isolar Barramento (SPI_CANCEL_ACCESS)"));
+  Serial.println(F(" 5) Testar Serial2 (TEST_SERIAL2_COM)"));
+  Serial.println(F(" 6) Executar Teste SPI (SPI_TEST)"));
+  Serial.println(F("---------------------------------"));
+  Serial.print(F(" Escolha uma opcao (1-6): "));
+}

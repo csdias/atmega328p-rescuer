@@ -1,0 +1,84 @@
+#include <SPI.h>
+
+/*
+ * FIRMWARE ARDUINO NANO (SLAVE)
+ */
+
+volatile char spi_buffer[32];
+volatile byte spi_pos = 0;
+volatile bool msg_pronta = false;
+
+void setup() {
+  Serial.begin(9600);
+
+  // Configuração SPI Slave
+  pinMode(MISO, OUTPUT);
+  SPCR |= _BV(SPE);  // Ativa SPI
+  SPCR |= _BV(SPIE); // Ativa Interrupção
+  
+  spi_pos = 0;
+  msg_pronta = false;
+}
+
+// Interrupção disparada a cada byte recebido no barramento SPI
+ISR(SPI_STC_vect) {
+  byte c = SPDR; 
+
+  if (spi_pos < sizeof(spi_buffer) - 1) {
+    spi_buffer[spi_pos++] = c;
+    if (c == '\n') {
+      msg_pronta = true;
+    }
+  }
+}
+
+void loop() {
+  // 1. Trata Comandos Serial
+  if (Serial.available() > 0) {
+    String cmd = Serial.readStringUntil('\n');
+    cmd.trim();
+
+    if (cmd == "LISTEN") {
+      Serial.println("ATMEGA_328P_ALIVE");
+    } 
+    else if (cmd == "SPI_TEST") {
+      // Limpa qualquer resíduo antes de confirmar
+      spi_pos = 0;
+      msg_pronta = false;
+      Serial.println("COM_SET");
+    }
+  }
+
+  // 2. Trata Mensagens SPI
+  if (msg_pronta) {
+    String spi_string = "";
+    for (byte i = 0; i < spi_pos; i++) {
+      spi_string += (char)spi_buffer[i];
+    }
+    spi_string.trim();
+
+    if (spi_string == "LISTEN") {
+      responderSPI("NANO_SPI_OK");
+    }
+
+    // RESET DE ESTADO (Crucial para não travar)
+    spi_pos = 0;
+    msg_pronta = false;
+    
+    // Limpa a Serial de novo para garantir sincronia com o próximo comando
+    while(Serial.available()) Serial.read(); 
+  }
+}
+
+void responderSPI(const char* resposta) {
+  size_t len = strlen(resposta);
+  for (size_t i = 0; i < len; i++) {
+    SPDR = resposta[i];
+    while (!(SPSR & (1 << SPIF))); 
+  }
+  SPDR = '\n'; // Garante o terminador para o Mega ler
+  while (!(SPSR & (1 << SPIF)));
+  
+  // Limpa o registrador final para evitar lixo no MISO
+  byte lixo = SPDR; 
+}

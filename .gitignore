@@ -1,0 +1,18 @@
+# ---- Build .NET / Visual Studio ----
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+*.userprefs
+temp-build/
+
+# ---- Projecto descartavel de ensaio ----
+ConsoleApp1/
+
+# ---- Backups ----
+*.zip
+
+# ---- Sistema ----
+Thumbs.db
+desktop.ini
