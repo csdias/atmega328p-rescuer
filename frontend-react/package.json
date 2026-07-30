@@ -1,0 +1,25 @@
+{
+  "name": "atmegapesta-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Front end React da bancada ATMegaPesta V1. src/partilhado não toca no DOM, para o React Native reutilizar.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "^9.0.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.9.0",
+    "vite": "^7.0.0"
+  }
+}

@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="ATMegaPestaV1.csproj" />
+  <Project Path="../ATMegaPestaV1.Core/ATMegaPestaV1.Core.csproj" />
+  <Project Path="../ATMegaPestaV1.Api/ATMegaPestaV1.Api.csproj" />
 </Solution>

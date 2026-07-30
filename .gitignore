@@ -7,6 +7,11 @@
 *.userprefs
 temp-build/
 
+# ---- Front end React ----
+node_modules/
+# Build do Vite: a API serve-o, mas quem o gera e o npm run build.
+ATMegaPestaV1.Api/wwwroot/
+
 # ---- Projecto descartavel de ensaio ----
 ConsoleApp1/
 

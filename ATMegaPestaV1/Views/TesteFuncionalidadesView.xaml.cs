@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using ATMegaPestaV1.Copias;
 using ATMegaPestaV1.Services;
 using Microsoft.Win32;
 
@@ -748,56 +749,16 @@ public partial class TesteFuncionalidadesView : UserControl
     }
 
     /// <summary>
-    /// Escreve a ficha da cópia: os fuse bits em hexadecimal, o que eles significam, e as
-    /// memórias que ficaram guardadas ao lado. Os quatro bytes por si só não dizem nada a
-    /// quem abrir a pasta meses depois — a descodificação é o que torna a ficha útil.
+    /// Escreve a ficha da cópia. O texto é construído no Core — a API escreve a mesma
+    /// ficha, e o comando de reposição dos fuses que lá vai não pode divergir entre os
+    /// dois front ends.
     /// </summary>
     private void EscreverFichaFuses(string caminho, CopiaResult copia)
     {
         var mcu = _mcuLido ?? FuseDecoder.PorDefeito;
-        var dec = FuseDecoder.Descodificar(copia.Fuses, mcu);
-        var f = copia.Fuses;
+        var ficha = FichaFuses.Construir(mcu, _assinaturaLida, copia, DateTime.Now);
 
-        var sb = new StringBuilder();
-        sb.AppendLine($"# Cópia de segurança do chip-alvo — {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
-        sb.AppendLine("# Escrita pelo ATMegaPesta V1. Só leitura: esta aplicação nunca grava fuses.");
-        sb.AppendLine();
-        sb.AppendLine($"MCU              = {mcu.Nome}");
-        sb.AppendLine($"Assinatura       = {_assinaturaLida ?? "n/d"}");
-        sb.AppendLine();
-        sb.AppendLine("# Fuse bits como estavam antes da transferência do verificador");
-        sb.AppendLine($"lfuse            = {f.Low}");
-        sb.AppendLine($"hfuse            = {f.High}");
-        sb.AppendLine($"efuse            = {f.Extended}");
-        sb.AppendLine($"lock             = {f.Lock ?? "n/d"}");
-
-        if (dec is not null)
-        {
-            sb.AppendLine();
-            sb.AppendLine("# O que estes bytes significam");
-            sb.AppendLine($"Relógio          = {dec.Relogio}");
-            sb.AppendLine($"CKDIV8           = {(dec.Ckdiv8Activo ? "activo — clock ÷8" : "desligado")}");
-            sb.AppendLine($"Brown-out        = {dec.BrownOut}");
-            sb.AppendLine($"ISP (SPIEN)      = {(dec.SpiActivo ? "habilitado" : "desactivado")}");
-            sb.AppendLine($"RESET (RSTDISBL) = {(dec.ResetActivo ? "activo" : "desactivado")}");
-            sb.AppendLine($"EEPROM em erase  = {(dec.EepromPreservada ? "preservada" : "apagada")}");
-            sb.AppendLine($"Bootloader       = {dec.DescricaoHigh}");
-            sb.AppendLine($"Bloqueio         = {dec.Bloqueio}");
-        }
-
-        sb.AppendLine();
-        sb.AppendLine("# Memórias guardadas nesta pasta");
-        foreach (var ficheiro in copia.Ficheiros)
-            sb.AppendLine($"#   {System.IO.Path.GetFileName(ficheiro)}");
-
-        sb.AppendLine();
-        sb.AppendLine("# Reposição dos fuses — por sua conta, não por esta aplicação:");
-        sb.AppendLine($"#   avrdude -c usbasp -p m328p " +
-                      $"-U lfuse:w:{f.Low}:m -U hfuse:w:{f.High}:m -U efuse:w:{f.Extended}:m");
-        sb.AppendLine("# Um valor errado aqui fecha o ISP e o chip só volta por alta tensão.");
-        sb.AppendLine("# O lock byte não se repõe por escrita: só um chip erase o devolve a 0xFF.");
-
-        File.WriteAllText(caminho, sb.ToString(), Encoding.UTF8);
+        File.WriteAllText(caminho, ficha, Encoding.UTF8);
     }
 
     /// <summary>Devolve o cartão ao estado de repouso: a descrição e o LED inactivo.</summary>
