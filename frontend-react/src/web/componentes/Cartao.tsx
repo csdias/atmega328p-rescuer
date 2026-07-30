@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { EstadoLed } from '../../partilhado/contratos';
+import type { EstadoLed } from '@atmegapesta/partilhado';
 import { Led } from './Led';
 
 /**

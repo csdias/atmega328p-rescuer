@@ -1,4 +1,4 @@
-import type { Bancada } from '../../partilhado/usarBancada';
+import type { Bancada } from '@atmegapesta/partilhado';
 import { LinhaIndicador } from '../componentes/Led';
 
 /**

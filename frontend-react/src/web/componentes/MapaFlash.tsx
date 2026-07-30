@@ -1,4 +1,4 @@
-import type { MapaFlash as Mapa } from '../../partilhado/contratos';
+import type { MapaFlash as Mapa } from '@atmegapesta/partilhado';
 
 /**
  * A barra da Flash: quanto sobra para a aplicação depois de reservado o bootloader.

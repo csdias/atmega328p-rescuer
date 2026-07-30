@@ -1,4 +1,4 @@
-import type { Bancada } from '../../partilhado/usarBancada';
+import type { Bancada } from '@atmegapesta/partilhado';
 
 /**
  * O passo entre a bancada verificada e a leitura: o chip tem de estar no ZIF antes de o

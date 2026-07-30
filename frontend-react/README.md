@@ -1,7 +1,7 @@
 # Front end React — ATMegaPesta V1
 
-Segundo front end da bancada, a par da aplicação WPF. Existe para preparar o React Native:
-a lógica que o nativo vai precisar está toda em `src/partilhado`, sem uma linha de DOM.
+A bancada no browser, a par da aplicação WPF. A lógica não vive aqui: está em
+`frontend-shared`, partilhada com a app Android (`frontend-mobile`).
 
 ## Porque é que há uma API
 
@@ -15,32 +15,34 @@ de acesso ao hardware.
 
 ```
 ATMegaPestaV1.Core/     serviços da bancada (WMI, porta série, avrdude) — sem UI
-ATMegaPestaV1/          front end WPF          ─┐
-ATMegaPestaV1.Api/      HTTP + SignalR          ├─ os dois usam o Core
-frontend-react/         front end React        ─┘  (o React através da API)
+ATMegaPestaV1/          WPF            ─┐
+ATMegaPestaV1.Api/      HTTP + SignalR  ├─ os dois usam o Core
+                                        │
+frontend-shared/        lógica da bancada — sem DOM
+frontend-react/         web (esta pasta) ─┐
+frontend-mobile/        Android           ┴─ as duas usam o frontend-shared
 ```
 
-## Estrutura, e o que o React Native vai reutilizar
+## Estrutura
+
+Nesta pasta só existe apresentação web:
 
 ```
 src/
-├─ partilhado/          sem DOM — copia-se para o React Native como está
-│  ├─ contratos.ts      os tipos, espelhando Api/Bancada/Contratos.cs
-│  ├─ clienteApi.ts     fetch + SignalR
-│  ├─ tokens.ts         paleta e medidas, em valores (não em CSS)
-│  └─ usarBancada.ts    o fluxo todo: estado, transições, chamadas
-└─ web/                 só web — componentes DOM e a folha de estilos
+├─ main.tsx
+└─ web/     componentes DOM, ecrãs e a folha de estilos
 ```
 
-No React Native muda-se a camada `web/` por ecrãs nativos e passa-se o endereço da bancada
-ao hook:
+A lógica — tipos, cliente da API, tokens da paleta e o fluxo inteiro (`usarBancada`) —
+está em `frontend-shared` e importa-se pelo nome do pacote:
 
 ```ts
-const bancada = usarBancada('http://192.168.1.50:5099');
+import { usarBancada } from '@atmegapesta/partilhado';
 ```
 
-`fetch` e `@microsoft/signalr` funcionam nos dois, e `tokens.ts` está em valores para
-alimentar um `StyleSheet` sem conversão.
+A app Android importa exactamente o mesmo. `fetch` e `@microsoft/signalr` funcionam nos
+dois, e `tokens.ts` está em valores (não em CSS) para o nativo o passar a `StyleSheet`
+sem conversão.
 
 ## Como correr
 
@@ -49,14 +51,16 @@ PATH.
 
 **Desenvolvimento** — duas consolas:
 
+O `npm install` corre uma vez, na **raiz do repositório** — instala as três pastas de front
+end de uma vez.
+
 ```bash
 # 1) a API (porta 5099)
 dotnet run --project ATMegaPestaV1.Api
 
 # 2) o Vite (porta 5173, encaminha /api e /hub para a API)
-cd frontend-react
-npm install
-npm run dev
+npm install       # na raiz do repo, uma vez
+npm run dev:web
 ```
 
 Abrir <http://localhost:5173>.
@@ -65,7 +69,7 @@ Abrir <http://localhost:5173>.
 mesma origem:
 
 ```bash
-cd frontend-react && npm run build
+npm run build:web       # na raiz do repo
 dotnet run --project ATMegaPestaV1.Api
 ```
 
@@ -81,7 +85,7 @@ Abrir <http://localhost:5099>.
 | `BaudRate`, `SerialTimeoutMs` | Ligação série ao master. |
 | `VerificarAssinatura` | `false` para firmware antigo, que não responde à opção 1. |
 | `PastaCopias` | Onde ficam as cópias. Vazio → `Documentos/ATMegaPesta/Copias`. |
-| `OrigensPermitidas` | Origens com CORS — o dev server do Vite, e o telefone quando o React Native chegar. |
+| `OrigensPermitidas` | Origens com CORS — o dev server do Vite. A app Android não precisa: CORS é uma regra de browser. |
 | `Kestrel:Endpoints:Http:Url` | `http://localhost:5099`. |
 
 ### Abrir à rede local

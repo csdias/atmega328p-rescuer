@@ -1,4 +1,9 @@
-import { HubConnectionBuilder, HubConnectionState, type HubConnection } from '@microsoft/signalr';
+import {
+  HubConnectionBuilder,
+  HubConnectionState,
+  HttpTransportType,
+  type HubConnection,
+} from '@microsoft/signalr';
 import type {
   Catalogo,
   Config,
@@ -61,7 +66,10 @@ export class ClienteBancada {
    */
   async ligarProgresso(aoProgresso: (p: Progresso) => void): Promise<() => void> {
     const hub = new HubConnectionBuilder()
-      .withUrl(`${this.baseUrl}/hub/bancada`)
+      // WebSockets explícito: é o único transporte que funciona igual no browser e no
+      // React Native. Deixado ao critério do SignalR, ele pode cair para Server-Sent
+      // Events ou long polling, que no nativo dependem de APIs de browser que não existem.
+      .withUrl(`${this.baseUrl}/hub/bancada`, { transport: HttpTransportType.WebSockets })
       .withAutomaticReconnect()
       .build();
 

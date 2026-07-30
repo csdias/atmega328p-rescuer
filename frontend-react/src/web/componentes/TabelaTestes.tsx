@@ -1,4 +1,4 @@
-import type { Catalogo, EstadoTeste, ResultadoTeste } from '../../partilhado/contratos';
+import type { Catalogo, EstadoTeste, ResultadoTeste } from '@atmegapesta/partilhado';
 
 /**
  * Os testes da verificação de integridade, com os pinos que cada um exercita.

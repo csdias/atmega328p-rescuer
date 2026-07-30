@@ -1,4 +1,4 @@
-import type { Catalogo } from '../../partilhado/contratos';
+import type { Catalogo } from '@atmegapesta/partilhado';
 
 /**
  * Os pinos do ATmega328P e os barramentos que os testes tocariam.

@@ -1,0 +1,19 @@
+{
+  "name": "@atmegapesta/partilhado",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lógica da bancada partilhada pelo front end web e pelo React Native. Sem DOM.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@microsoft/signalr": "*",
+    "react": "*"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
+  }
+}

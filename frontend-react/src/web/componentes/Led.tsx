@@ -1,4 +1,4 @@
-import type { EstadoLed, Indicador } from '../../partilhado/contratos';
+import type { EstadoLed, Indicador } from '@atmegapesta/partilhado';
 
 /** O ponto colorido dos LEDs do WPF. */
 export function Led({ estado }: { estado: EstadoLed }) {

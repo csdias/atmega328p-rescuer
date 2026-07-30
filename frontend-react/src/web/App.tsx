@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { usarBancada } from '../partilhado/usarBancada';
+import { usarBancada } from '@atmegapesta/partilhado';
 import { EcranEmConstrucao } from './ecrans/EcranEmConstrucao';
 import { EcranInserirChip } from './ecrans/EcranInserirChip';
 import { EcranTestes } from './ecrans/EcranTestes';

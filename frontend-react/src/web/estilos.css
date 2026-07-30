@@ -1,5 +1,5 @@
 /*
-  Os valores vêm de src/partilhado/tokens.ts, que por sua vez vem do LightTheme.xaml do
+  Os valores vêm de frontend-shared/src/tokens.ts, que por sua vez vem do LightTheme.xaml do
   WPF. Aqui só se declaram as custom properties e o que é próprio do web (grelha, foco,
   scroll) — a paleta não se decide neste ficheiro.
 */

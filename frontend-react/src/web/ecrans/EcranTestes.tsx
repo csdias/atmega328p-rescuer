@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { Copia, Leitura } from '../../partilhado/contratos';
-import type { Bancada } from '../../partilhado/usarBancada';
+import type { Bancada, Copia, Leitura } from '@atmegapesta/partilhado';
 import { Cartao } from '../componentes/Cartao';
 import { Dialogo } from '../componentes/Dialogo';
 import { MapaFlash } from '../componentes/MapaFlash';

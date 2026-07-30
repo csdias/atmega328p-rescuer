@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Front end React da bancada ATMegaPesta V1. src/partilhado não toca no DOM, para o React Native reutilizar.",
+  "description": "Front end web da bancada ATMegaPesta V1. A lógica vem de @atmegapesta/partilhado.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -11,15 +11,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@atmegapesta/partilhado": "*",
     "@microsoft/signalr": "^9.0.6",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
+    "@types/react": "~19.2.2",
+    "@types/react-dom": "~19.2.2",
     "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.9.0",
+    "typescript": "~6.0.3",
     "vite": "^7.0.0"
   }
 }

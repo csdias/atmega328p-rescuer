@@ -1,0 +1,18 @@
+{
+  "name": "atmegapesta-frontends",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Front ends da bancada ATMegaPesta V1: web (React) e telemóvel (React Native), sobre lógica partilhada.",
+  "workspaces": [
+    "frontend-shared",
+    "frontend-react",
+    "frontend-mobile"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "dev:web": "npm run dev -w frontend-react",
+    "build:web": "npm run build -w frontend-react",
+    "start:mobile": "npm run start -w frontend-mobile",
+    "android": "npm run android -w frontend-mobile"
+  }
+}
