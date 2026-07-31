@@ -30,14 +30,14 @@ Nesta pasta só existe apresentação web:
 ```
 src/
 ├─ main.tsx
-└─ web/     componentes DOM, ecrãs e a folha de estilos
+└─ web/     components/ DOM, screens/ e a folha de estilos (styles.css)
 ```
 
-A lógica — tipos, cliente da API, tokens da paleta e o fluxo inteiro (`usarBancada`) —
+A lógica — tipos, cliente da API, tokens da paleta e o fluxo inteiro (`useBench`) —
 está em `frontend-shared` e importa-se pelo nome do pacote:
 
 ```ts
-import { usarBancada } from '@atmegapesta/partilhado';
+import { useBench } from '@atmegapesta/shared';
 ```
 
 A app Android importa exactamente o mesmo. `fetch` e `@microsoft/signalr` funcionam nos

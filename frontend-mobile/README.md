@@ -12,7 +12,7 @@ frontend-react/      a app web (browser)
 frontend-mobile/     esta app (Android)
 ```
 
-`frontend-shared` tem os tipos, o cliente da API e o fluxo todo (`usarBancada`). Esta app
+`frontend-shared` tem os tipos, o cliente da API e o fluxo todo (`useBench`). Esta app
 não reimplementa nada disso — só desenha ecrãs nativos por cima. Se a API mudar, muda-se
 num sítio e as duas apps acompanham.
 
@@ -20,9 +20,9 @@ Nesta pasta só existe apresentação:
 
 ```
 App.tsx              junta tudo; guarda o endereço da bancada entre arranques
-src/estilos.ts       StyleSheet a partir dos tokens partilhados
-src/componentes/     Led, Cartão, Botão, mapas, diálogo
-src/ecrans/          Ligação, Verificação, Inserir chip, Trabalho
+src/styles.ts        StyleSheet a partir dos tokens partilhados
+src/components/      Led, cartão, botão, mapas, diálogo
+src/screens/         Connection, Verification, InsertChip, Work
 ```
 
 ## O que é o Expo
