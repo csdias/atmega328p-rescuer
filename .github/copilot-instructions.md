@@ -116,6 +116,24 @@ Renomear uma chave de configuração só de um lado não dá erro — dá o valo
 - Comentários explicam **porquê**, não o quê. O código já diz o quê.
 - Sem comentários decorativos.
 
+### Cores
+
+**Nunca escreva uma cor literal no code-behind.** Peça-a ao tema: `ThemeBrush("BrushPinSuccess")`
+no WPF, `colours.*` de `tokens.ts` nos front ends. Só existe um tema (`LightTheme.xaml`,
+fundo `#F5F5F5`), e uma cor fixa escapa-lhe.
+
+Isto já correu mal: o `MainWindow.xaml.cs` tinha sete valores da paleta Catppuccin Mocha
+(um tema **escuro**) sobre o fundo claro — o texto das mensagens ficava a 1.33:1 de
+contraste, praticamente invisível.
+
+Ao escolher ou mudar uma cor, meça-a contra `#F5F5F5`:
+
+| Uso | Mínimo |
+|---|---|
+| Texto | 4.5:1 |
+| LEDs, barras, molduras (não-texto) | 3:1 |
+| Estados inactivos | isentos |
+
 ## Verificar antes de dar por feito
 
 ```bash
@@ -128,13 +146,6 @@ npm run lint
 
 ## Problemas conhecidos — não são para "arrumar" de passagem
 
-- **`MainWindow.xaml.cs` tem 7 cores fixas que contornam o tema.** São da paleta Catppuccin
-  Mocha (tema escuro) e o `LightTheme.xaml` é claro (`#F5F5F5`). O contraste resultante
-  falha: `#CDD6F4` usado como **texto** dá 1.33:1 (mínimo 4.5:1), e o LED verde `#A6E3A1`
-  dá 1.36:1 (mínimo 3:1 para elementos não-textuais). O tema já tem as cores certas —
-  `BrushPinSuccess` (4.81:1), `BrushPinError` (4.57:1) — e o `FunctionalTestsView` usa-as
-  correctamente via `ThemeBrush()`. Corrigir isto muda o aspecto do ecrã de verificação:
-  **pergunte antes**.
 - **`--radius-pill` é usado e nunca declarado** em `styles.css`.
 - **`BtnHelp_Click`, `HelpTopics` e `HelpDialog` são código morto** no WPF: o estilo
   `HelpButton` existe mas nenhum botão o usa, e nenhum `Tag=` liga ao dicionário.

@@ -63,10 +63,16 @@
     <SolidColorBrush x:Key="BrushSuccessText"   Color="#FFFFFF"/>
     <SolidColorBrush x:Key="BrushWarning"         Color="#D97706"/>
     <SolidColorBrush x:Key="BrushWarningText"     Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="BrushPinError"       Color="#D9222B"/>
+    <SolidColorBrush x:Key="BrushPinError"      Color="#D9222B"/>
     <SolidColorBrush x:Key="BrushPinSuccess"    Color="#2D7A4F"/>
-    <SolidColorBrush x:Key="BrushPinWarning"      Color="#D97706"/>
-    <SolidColorBrush x:Key="BrushPinIdle"   Color="#CCCCCC"/>
+    <!-- Amber darkened from #D97706: over the #F5F5F5 background that gave 2.92:1, which
+         failed even the 3:1 asked of a non-text element — and it is used as text too.
+         #B45309 gives 4.61:1, clearing text (4.5:1) and fill (3:1) both. -->
+    <SolidColorBrush x:Key="BrushPinWarning"     Color="#B45309"/>
+    <!-- Deliberately pale: this is the "not checked yet" state. The indicator carries a
+         #888888 outline (StatusEllipse) and a line of text beside it, so the fill is not
+         the only thing saying what is going on. -->
+    <SolidColorBrush x:Key="BrushPinIdle"       Color="#CCCCCC"/>
 
     <!-- Geometry and typography. The names go by weight, not by place, so one
          measurement can serve several controls. -->

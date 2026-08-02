@@ -20,8 +20,25 @@ public partial class MainWindow : Window
     private string? _comPort;
     private DispatcherTimer? _clock;
 
-    private static readonly Brush GreenColour = new SolidColorBrush(Color.FromRgb(0xA6, 0xE3, 0xA1));
-    private static readonly Brush RedColour = new SolidColorBrush(Color.FromRgb(0xF3, 0x8B, 0xA8));
+    /// <summary>
+    /// The colours come from the theme, not from literals here.
+    ///
+    /// They used to be hard-coded Catppuccin Mocha values — a dark palette — over the
+    /// light #F5F5F5 background of LightTheme.xaml. The message text sat at 1.33:1 against
+    /// a required 4.5:1, and the green LED at 1.36:1 against a required 3:1: readable on
+    /// the dark theme they were taken from, nearly invisible on this one.
+    ///
+    /// Properties and not static fields, so a theme swap is picked up instead of being
+    /// frozen at type-load.
+    /// </summary>
+    private static Brush ThemeBrush(string key) =>
+        (Brush?)Application.Current.Resources[key] ?? Brushes.Transparent;
+
+    private static Brush GreenColour => ThemeBrush("BrushPinSuccess");
+    private static Brush RedColour   => ThemeBrush("BrushPinError");
+    private static Brush AmberColour => ThemeBrush("BrushPinWarning");
+    private static Brush IdleColour  => ThemeBrush("BrushPinIdle");
+    private static Brush TextColour  => ThemeBrush("BrushTextNormal");
 
     public MainWindow()
     {
@@ -76,7 +93,7 @@ public partial class MainWindow : Window
         BtnVerify.IsEnabled = false;
         _currentAttempt++;
 
-        TxtMessage.Foreground = new SolidColorBrush(Color.FromRgb(0xCD, 0xD6, 0xF4));
+        TxtMessage.Foreground = TextColour;
         TxtMessage.Text = "A verificar dispositivos...";
 
         var devices = await _detector.DetectAsync();
@@ -102,7 +119,7 @@ public partial class MainWindow : Window
             TxtMessage.Text = "Não foi possível detectar todos os dispositivos após várias tentativas.\n" +
                               "Por favor, contacte a assistência técnica.";
             TxtAttempts.Text = "";
-            TxtFooter.Foreground = new SolidColorBrush(Color.FromRgb(0xCD, 0xD6, 0xF4));
+            TxtFooter.Foreground = TextColour;
             TxtFooter.Text = "Pressione qualquer tecla para terminar a aplicação.";
             Focus();
             _verificationRunning = false;
@@ -111,7 +128,7 @@ public partial class MainWindow : Window
 
         var attemptsLeft = _maxAttempts - _currentAttempt;
         TxtAttempts.Text = $"Tentativa {_currentAttempt} de {_maxAttempts}";
-        TxtMessage.Foreground = new SolidColorBrush(Color.FromRgb(0xFA, 0xB3, 0x87));
+        TxtMessage.Foreground = AmberColour;
         TxtMessage.Text = "Dispositivo(s) em falta. Por favor, ligue o(s) dispositivo(s) e pressione o botão novamente.";
         BtnVerify.Content = $"Tentar Novamente ({attemptsLeft} restante{(attemptsLeft != 1 ? "s" : "")})";
         BtnVerify.IsEnabled = true;
@@ -236,7 +253,7 @@ public partial class MainWindow : Window
     {
         if (port is null || result is null)
         {
-            LedSignature.Fill = new SolidColorBrush(Color.FromRgb(0x6C, 0x70, 0x86));
+            LedSignature.Fill = IdleColour;
             TxtSignatureDetail.Text = "A aguardar detecção do CH340...";
             return;
         }
@@ -260,7 +277,7 @@ public partial class MainWindow : Window
 
     private void UpdateSignatureStateSkipped()
     {
-        LedSignature.Fill = new SolidColorBrush(Color.FromRgb(0x6C, 0x70, 0x86));
+        LedSignature.Fill = IdleColour;
         TxtSignatureDetail.Text = "Verificação de assinatura ignorada";
     }
 }
