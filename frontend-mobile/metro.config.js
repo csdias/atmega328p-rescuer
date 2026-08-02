@@ -6,18 +6,18 @@
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 
-const raizApp = __dirname;
-const raizRepo = path.resolve(raizApp, '..');
+const appRoot = __dirname;
+const repoRoot = path.resolve(appRoot, '..');
 
-const config = getDefaultConfig(raizApp);
+const config = getDefaultConfig(appRoot);
 
 // Watch the whole repository: a change in frontend-shared reloads the app.
-config.watchFolders = [raizRepo];
+config.watchFolders = [repoRoot];
 
 // The packages are hoisted to the repository root (npm workspaces), not here.
 config.resolver.nodeModulesPaths = [
-  path.resolve(raizApp, 'node_modules'),
-  path.resolve(raizRepo, 'node_modules'),
+  path.resolve(appRoot, 'node_modules'),
+  path.resolve(repoRoot, 'node_modules'),
 ];
 
 // Without this, Metro would walk up the tree looking for node_modules and could find a

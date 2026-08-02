@@ -11,19 +11,38 @@ errado nessa linha fecha o ISP e o chip só volta por programação de alta tens
 
 ---
 
-## O hardware
+## O que é a "bancada"
+
+**A bancada é a montagem física inteira** — não uma peça, mas o conjunto que fica em cima
+da mesa do laboratório:
 
 ```
-        PC (Windows)
-         │        │
-   CH340 │        │ USBAsp
-   (série)        │ (ISP, via avrdude.exe)
-         │        │
-         ▼        ▼
-  ATmega2560 ─── barramento SPI ─── ATmega328P
-  Pro Mini        (comutado)         (chip-alvo,
-  «master»                            no socket ZIF)
+PC (Windows, com avrdude.exe)
+ ├── CH340 ──────► ATmega2560 Pro Mini   ← o "master", corre o Prog_Tester V1.2
+ │                        │                 e decide quem manda no barramento
+ │                        ▼
+ └── USBAsp ──────► barramento SPI/ISP
+                          │
+                          ▼
+                   socket ZIF ── ATmega328P do aluno   ← o "chip-alvo"
 ```
+
+O que o aluno traz é o **chip-alvo**. A bancada é tudo o resto.
+
+Essa distinção governa os nomes por todo o lado, e vale a pena tê-la presente antes de
+mexer no código:
+
+- `DetectedDevices.Complete` significa *a bancada tem tudo o que precisa* — CH340 **e**
+  USBAsp presentes.
+- `BenchService` é singleton com semáforo porque **a bancada é uma só**: uma porta série,
+  um USBAsp, um barramento. Dois pedidos em simultâneo deixariam o alvo ligado a dois
+  mestres, e o avrdude a correr duas vezes em paralelo falha as duas.
+- Nas URLs, `/api/bench/*` são operações sobre o equipamento (detectar, reiniciar) e
+  `/api/target/*` são sobre o chip do aluno (ler configurações, guardar cópia).
+
+Em inglês, no código, `bancada` é **`bench`** — em identificadores e em comentários.
+
+### O master
 
 O **ATmega2560 Pro Mini** corre o firmware `Prog_Tester V1.2` e faz de *BusManager*: é ele
 que decide quem está ligado ao barramento ISP do chip-alvo — o USBAsp, ele próprio, ou

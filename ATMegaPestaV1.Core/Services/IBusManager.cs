@@ -18,18 +18,18 @@ public static class MenuTester
 }
 
 /// <summary>
-/// Result of reading the rig's signature (menu option 1).
+/// Result of reading the bench's signature (menu option 1).
 /// </summary>
 public record SignatureResult(bool Valid, string? Signature, string? Response);
 
 /// <summary>
 /// Represents the BusManager (master firmware on the ATMega2560 Pro Mini, over CH340).
-/// Responsible for identifying the rig and for switching the ISP bus between USBAsp and
+/// Responsible for identifying the bench and for switching the ISP bus between USBAsp and
 /// Mega, isolating it, or running the Serial2/SPI diagnostics.
 /// </summary>
 public interface IBusManager
 {
-    /// <summary>Sends "1" → returns the rig's signature, already validated.</summary>
+    /// <summary>Sends "1" → returns the bench's signature, already validated.</summary>
     Task<SignatureResult> VerifySignatureAsync(CancellationToken ct = default);
 
     /// <summary>Sends "2" → puts the USBAsp on the ISP bus (USBASP_SPI).</summary>

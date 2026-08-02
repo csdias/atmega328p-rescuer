@@ -52,7 +52,7 @@ public static class TestCatalog
 ///
 /// The Prog_Tester V1.2 firmware only exposes Serial2 and SPI diagnostics: for GPIO, I²C,
 /// ADC and PWM there is no command at all, and without a measurement there is no result.
-/// A made-up PASS/FAIL would be indistinguishable at the rig from a real measurement —
+/// A made-up PASS/FAIL would be indistinguishable at the bench from a real measurement —
 /// hence this state existing instead of inventing results.
 /// </summary>
 public static class IntegrityState

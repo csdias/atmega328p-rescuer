@@ -37,7 +37,7 @@ public partial class MainWindow : Window
         if (_maxAttempts <= 0)
             _maxAttempts = 3;
 
-        // The signature is option 1 of the firmware menu (Prog_Tester V1.2). Rigs with
+        // The signature is option 1 of the firmware menu (Prog_Tester V1.2). Benches with
         // older firmware do not answer — hence the option to turn the check off.
         _verifySignature = config.GetValue("VerifySignature", true);
 
@@ -209,7 +209,7 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Asks the rig for its signature (menu option 1) and updates the matching LED.
+    /// Asks the bench for its signature (menu option 1) and updates the matching LED.
     /// </summary>
     private async Task<bool> VerifySignatureAsync(string? port)
     {

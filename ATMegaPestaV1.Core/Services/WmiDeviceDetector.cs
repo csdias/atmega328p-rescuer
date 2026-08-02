@@ -7,7 +7,7 @@ namespace ATMegaPestaV1.Services;
 /// Real detection, over WMI, against the PnP devices Windows enumerates.
 ///
 /// WMI failures are not propagated: a query that blows up is indistinguishable, to whoever
-/// is standing at the rig, from a device that is not plugged in — and the verification
+/// is standing at the bench, from a device that is not plugged in — and the verification
 /// screen already says what to do in that case.
 /// </summary>
 public class WmiDeviceDetector : IDeviceDetector

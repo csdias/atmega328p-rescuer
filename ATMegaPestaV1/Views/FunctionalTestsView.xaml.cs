@@ -268,7 +268,7 @@ public partial class FunctionalTestsView : UserControl
 
             if (!detect.Success)
             {
-                // avrdude's raw output does not come in here: to whoever is at the rig it
+                // avrdude's raw output does not come in here: to whoever is at the bench it
                 // is noise, and the failure panel already says what to do. It still goes
                 // to the log through AppendLog, above.
                 SetConfigState("O chip-alvo não respondeu ao ISP.", RedColour);
@@ -684,7 +684,7 @@ public partial class FunctionalTestsView : UserControl
             return false;
         }
 
-        // Timestamped on the spot: whoever brings several parts to the rig does not end
+        // Timestamped on the spot: whoever brings several parts to the bench does not end
         // up with backups overlapping each other with no way to tell which is which.
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         // System.IO.Path spelled out: this file's System.Windows.Shapes.Path (the LEDs'
@@ -867,7 +867,7 @@ public partial class FunctionalTestsView : UserControl
     /// The integrity check has no real execution. The Prog_Tester V1.2 firmware only
     /// exposes Serial2 and SPI diagnostics — for GPIO, I²C, ADC and PWM there is no
     /// command at all, and without a measurement there is no result. What used to be here
-    /// was a PASS/FAIL draw, indistinguishable at the rig from a real measurement;
+    /// was a PASS/FAIL draw, indistinguishable at the bench from a real measurement;
     /// leaving the tests unrun is less information but information that is right.
     /// </summary>
     private Task RunTests(List<TestItem> tests)

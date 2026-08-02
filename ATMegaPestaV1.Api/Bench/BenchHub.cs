@@ -5,7 +5,7 @@ namespace ATMegaPestaV1.Api.Bench;
 /// <summary>
 /// Progress channel for the front ends.
 ///
-/// It only carries server → client traffic: the rig's operations are asked for over HTTP,
+/// It only carries server → client traffic: the bench's operations are asked for over HTTP,
 /// and what comes through here are the status lines the WPF used to write on the card
 /// while the operation ran ("A activar o USBAsp no barramento..."). An ISP access takes
 /// seconds and nobody should be left staring at a frozen screen.

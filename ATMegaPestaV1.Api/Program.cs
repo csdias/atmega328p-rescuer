@@ -13,13 +13,13 @@ builder.Services.Configure<JsonOptions>(o =>
 
 builder.Services.AddSignalR();
 
-// Singleton because there is only one rig. The service serialises hardware access
+// Singleton because there is only one bench. The service serialises hardware access
 // internally — see BenchService.
 builder.Services.AddSingleton<BenchService>();
 
 // Vite's dev server serves from a different origin. In production the React build is
 // served by this same API (wwwroot), where there is no CORS to solve; the policy exists
-// for development and for React Native pointing at the rig over the LAN.
+// for development and for React Native pointing at the bench over the LAN.
 var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
               ?? ["http://localhost:5173", "http://127.0.0.1:5173"];
 

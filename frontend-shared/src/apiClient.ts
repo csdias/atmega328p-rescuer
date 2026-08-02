@@ -35,8 +35,8 @@ export class BenchClient {
   config = () => this.request<Config>('GET', '/api/bench/config');
 
   /**
-   * Scans the USB and asks the rig for its signature. Each call is one attempt, while the
-   * rig is not yet complete.
+   * Scans the USB and asks the bench for its signature. Each call is one attempt, while the
+   * bench is not yet complete.
    */
   detect = () => this.request<Detection>('POST', '/api/bench/detect');
 

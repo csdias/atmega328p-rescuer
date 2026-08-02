@@ -26,7 +26,7 @@ export interface Detection {
   usbAsp: Indicator;
   signature: Indicator;
   comPort: string | null;
-  /** Rig complete and equipment identified. */
+  /** Bench complete and equipment identified. */
   canProceed: boolean;
   attempt: number;
   maxAttempts: number;

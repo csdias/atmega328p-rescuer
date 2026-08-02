@@ -3,7 +3,7 @@ import type { Bench } from '@atmegapesta/shared';
 import { Notice, Botao, Card, IndicatorRow } from '../components/Basics';
 import { ledColours, estilos } from '../styles';
 
-/** The startup: until the bench is complete and the rig identified, nothing moves on. */
+/** The startup: until the bench is complete and the equipment identified, nothing moves on. */
 export function VerificationScreen({
   bench,
   onSwitchBench,

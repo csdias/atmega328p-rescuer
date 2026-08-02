@@ -17,7 +17,7 @@ public enum LedState
 /// <summary>An indicator: the colour and the line of text that goes with it.</summary>
 public record Indicator(LedState State, string Detail);
 
-/// <summary>Rig parameters the front end needs to know at startup.</summary>
+/// <summary>Bench parameters the front end needs to know at startup.</summary>
 public record ConfigResponse(
     int MaxAttempts,
     bool VerifySignature,
@@ -27,7 +27,7 @@ public record ConfigResponse(
 /// <summary>
 /// Result of a USB scan, with the signature already verified.
 /// </summary>
-/// <param name="CanProceed">Rig complete and equipment identified.</param>
+/// <param name="CanProceed">Bench complete and equipment identified.</param>
 /// <param name="Exhausted">
 /// Attempts spent without success — the front end shows the shutdown, as the WPF does.
 /// </param>

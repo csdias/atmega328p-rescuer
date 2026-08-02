@@ -2,7 +2,7 @@ import type { Bench } from '@atmegapesta/shared';
 import { IndicatorRow } from '../components/Led';
 
 /**
- * The startup: until the bench is complete and the rig identified, nothing moves on.
+ * The startup: until the bench is complete and the equipment identified, nothing moves on.
  * It is the screen the WPF shows before the main panel.
  */
 export function VerificationScreen({ bench }: { bench: Bench }) {

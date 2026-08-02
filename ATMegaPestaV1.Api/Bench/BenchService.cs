@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.SignalR;
 namespace ATMegaPestaV1.Api.Bench;
 
 /// <summary>
-/// The rig as the API sees it. Does what the WPF code-behind did — scans the USB, routes
+/// The bench as the API sees it. Does what the WPF code-behind did — scans the USB, routes
 /// the bus, reads the target chip, saves the backup — and reports the same things it did.
 ///
-/// It is a singleton and serialises everything behind a semaphore because the rig is a
+/// It is a singleton and serialises everything behind a semaphore because the bench is a
 /// single physical resource: one serial port, one USBAsp, one bus. Two HTTP requests
 /// switching the bus at the same time would leave the target connected to two masters, and
 /// avrdude running twice in parallel fails both times. Whoever arrives mid-operation waits
@@ -54,7 +54,7 @@ public class BenchService
         var max = config.GetValue<int>("MaxAttempts");
         _maxAttempts = max > 0 ? max : 3;
 
-        // Rigs with older firmware do not answer option 1 — hence the option to turn the
+        // Benches with older firmware do not answer option 1 — hence the option to turn the
         // check off, as in the WPF.
         _verifySignature = config.GetValue("VerifySignature", true);
 
@@ -87,8 +87,8 @@ public class BenchService
     // ── Device verification ─────────────────────────────────────────────────
 
     /// <summary>
-    /// Scans the USB and asks the rig for its signature. Each call is one attempt, like
-    /// each click of the WPF button — except once the rig is already complete, where a new
+    /// Scans the USB and asks the bench for its signature. Each call is one attempt, like
+    /// each click of the WPF button — except once the bench is already complete, where a new
     /// call only reconfirms what is plugged in (the front end may reload the page) and
     /// does not spend attempts.
     /// </summary>
@@ -154,7 +154,7 @@ public class BenchService
             LedState.Error);
 
     /// <summary>
-    /// Asks the rig for its signature (option 1 of the firmware menu). With no CH340 there
+    /// Asks the bench for its signature (option 1 of the firmware menu). With no CH340 there
     /// is nowhere to ask, and with the check turned off it is not asked.
     /// </summary>
     private async Task<(Indicator, bool)> VerifySignatureAsync(string? port, CancellationToken ct)
@@ -279,7 +279,7 @@ public class BenchService
             if (!detect.Success)
             {
                 // avrdude's raw output does not go into the message: to whoever is at the
-                // rig it is noise. It travels separately, for anyone who wants the log.
+                // bench it is noise. It travels separately, for anyone who wants the log.
                 var isolated = await IsolateAsync(ct);
                 busActive = false;
 
@@ -356,7 +356,7 @@ public class BenchService
 
     private async Task<BackupResponse> SaveBackupInternalAsync(CancellationToken ct)
     {
-        // Timestamped on the spot: whoever brings several parts to the rig does not end up
+        // Timestamped on the spot: whoever brings several parts to the bench does not end up
         // with backups overlapping each other with no way to tell which is which.
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         var folder = Path.Combine(_backupFolder, timestamp);
@@ -467,7 +467,7 @@ public class BenchService
     ///
     /// The switching and the isolation do actually happen; it is the measurement that does
     /// not exist. The Prog_Tester V1.2 firmware only exposes Serial2 and SPI diagnostics,
-    /// and a made-up PASS/FAIL would be indistinguishable at the rig from a real
+    /// and a made-up PASS/FAIL would be indistinguishable at the bench from a real
     /// measurement.
     /// </summary>
     public async Task<IntegrityResponse> RunIntegrityAsync(

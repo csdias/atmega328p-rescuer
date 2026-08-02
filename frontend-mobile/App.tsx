@@ -63,7 +63,7 @@ export default function App() {
     );
 
   // The key forces a fresh mount when switching bench: the hook keeps state from the
-  // previous rig (port, attempts) that does not hold for another one.
+  // previous bench (port, attempts) that does not hold for another one.
   return <Bench key={address} address={address} onSwitchBench={trocar} />;
 }
 
