@@ -93,56 +93,130 @@ Detalhes de cada uma: [`frontend-react/README.md`](frontend-react/README.md) e
 
 ---
 
-## Como correr
+## Passo a passo
 
-**Precisa de:** .NET 10 SDK, Node 20+, `avrdude.exe` no `PATH`, e a bancada ligada
-(CH340 + USBAsp).
+### Passo 0 — instalar o que é preciso (uma vez)
 
-### A aplicação WPF
+| | Para quê | Verificar |
+|---|---|---|
+| **.NET 10 SDK** | WPF e API | `dotnet --version` |
+| **Node 20+** | os front ends | `node --version` |
+| **`avrdude.exe` no `PATH`** | falar com o chip-alvo | `avrdude -v` |
+
+Depois, uma vez, na raiz do repositório:
+
+```bash
+npm install
+```
+
+Isto instala os três workspaces **e o Expo**. Não há mais nada a instalar no computador
+para a app Android: o `expo` fica em `node_modules` e o `npm run start:mobile` chama-o de
+lá. O antigo `expo-cli` global está descontinuado — não o instale.
+
+---
+
+### Passo a passo A — a aplicação WPF
+
+É a aplicação de referência. Não precisa de Node nem da API.
 
 ```bash
 dotnet run --project ATMegaPestaV1
 ```
 
-É a aplicação de referência — não precisa de Node nem da API.
+---
 
-### A app web
+### Passo a passo B — a app web
 
-Dois terminais, porque o Vite não serve a API: encaminha-lhe os pedidos.
+**1.** Numa consola, a API:
 
 ```bash
-# 1) a API — fica em http://localhost:5099
 dotnet run --project ATMegaPestaV1.Api
+```
 
-# 2) o Vite — abre em http://localhost:5173
+Fica em `http://localhost:5099`. Deixe-a a correr.
+
+**2.** Noutra consola, o Vite:
+
+```bash
 npm run dev:web
 ```
 
-Se abrir o `5173` sem a API a correr, a página carrega mas fica em erro: o `useBench` pede
-a configuração e o catálogo logo no arranque.
+**3.** Abrir `http://localhost:5173`.
 
-**Em produção não são dois.** `npm run build:web` compila o React para
+O Vite não serve a API — encaminha-lhe `/api` e `/hub`. Por isso são duas consolas. Se
+abrir o `5173` sem a API a correr, a página carrega mas fica em erro: o `useBench` pede a
+configuração e o catálogo logo no arranque.
+
+**Em produção não são duas.** `npm run build:web` compila o React para
 `ATMegaPestaV1.Api/wwwroot/`, e a partir daí é a própria API que serve a página — mesma
-origem, mesma porta, sem CORS. Só precisa do `dotnet run`.
+origem, mesma porta, sem CORS. Basta o `dotnet run`.
 
-### A app Android
+---
 
-```bash
-npm run android        # telemóvel por USB, ou emulador
-npm run start:mobile   # QR code para o Expo Go
+### Passo a passo C — a app Android (Expo Go)
+
+Precisa de um telemóvel Android **na mesma rede Wi-Fi** que o computador, com a app
+**Expo Go** instalada (grátis, na Play Store). Não precisa de Android Studio, nem de Java,
+nem do SDK do Android: quem corre o código é o telemóvel.
+
+> `npm run android` é outra coisa — compila e instala um APK, e para isso **precisa de
+> Java e do Android SDK**. Sem eles falha. Para desenvolver, use o Expo Go.
+
+**1. Abrir a API à rede.** Por omissão só ouve em loopback e o telemóvel não lhe chega. Em
+`ATMegaPestaV1.Api/appsettings.json`:
+
+```json
+"Kestrel": { "Endpoints": { "Http": { "Url": "http://0.0.0.0:5099" } } }
 ```
 
-No primeiro ecrã escreve-se o endereço do PC da bancada (ex. `http://192.168.1.50:5099`).
-Esse endereço tem de constar em `AllowedOrigins` no `appsettings.json` da API, senão o CORS
-recusa.
+**2. Deixar passar na firewall do Windows.** Numa consola **como administrador**:
 
-### Verificações
+```powershell
+New-NetFirewallRule -DisplayName "ATMegaPesta API 5099" `
+  -Direction Inbound -LocalPort 5099 -Protocol TCP -Action Allow -Profile Private
+```
+
+`-Profile Private` limita à rede doméstica — não abre a porta em redes públicas. Sem esta
+regra o telemóvel liga-se ao Metro mas nunca à API, e a app fica em erro no ecrã de
+ligação.
+
+**3. Descobrir o IP do computador:**
+
+```powershell
+Get-NetIPAddress -AddressFamily IPv4 | Where-Object InterfaceAlias -like '*Wi*'
+```
+
+É o IPv4 da placa Wi-Fi (algo como `192.168.1.92`). Ignore endereços `172.*` de switches
+virtuais do Hyper-V/WSL — o telemóvel não os alcança.
+
+**4. Arrancar as duas coisas**, em consolas separadas:
+
+```bash
+dotnet run --project ATMegaPestaV1.Api    # consola 1
+npm run start:mobile                      # consola 2 — o Metro, na porta 8081
+```
+
+**5.** Ler o código QR que a consola 2 mostra, com a **Expo Go**.
+
+**6.** No primeiro ecrã da app, escrever o endereço da bancada — `http://192.168.1.92:5099`,
+com o IP do passo 3 — e ligar. Fica guardado entre arranques.
+
+---
+
+### Verificações (sem hardware nem telemóvel)
 
 ```bash
 dotnet build ATMegaPestaV1/ATMegaPestaV1.slnx
-npm run typecheck      # tsc nos três workspaces
-npm run lint           # eslint, com as Rules of Hooks
+npm run typecheck                          # tsc nos três workspaces
+npm run lint                               # eslint, com as Rules of Hooks
+npm run build:web                          # o Vite compila mesmo
+
+cd frontend-mobile && npx expo export --platform android
 ```
+
+O último é o que vale a pena não esquecer: o `tsc` valida tipos, mas quem resolve módulos
+em React Native é o **Metro**, com regras próprias (`metro.config.js`). Um `tsc` limpo não
+prova que o Metro encontra o pacote partilhado.
 
 ---
 

@@ -37,24 +37,49 @@ o Android Studio e o Gradle à mão. O código dos ecrãs é React Native normal
 Precisas de: Node 20+, um telemóvel Android com a app **Expo Go** (grátis, na Play Store),
 e o telemóvel na mesma rede Wi-Fi que o computador da bancada.
 
-**1. Abrir a API à rede.** Por omissão ela só aceita ligações do próprio computador. Em
-`ATMegaPestaV1.Api/appsettings.json`:
+**Não há nada de Expo para instalar no computador.** O `expo` vem em `node_modules` com o
+`npm install` da raiz, e o `npm run start:mobile` chama-o de lá. O antigo `expo-cli` global
+está descontinuado — não o instales.
+
+> Também não precisas de Android Studio, nem de Java, nem do SDK do Android: no Expo Go
+> quem corre o código é o telemóvel. Isso só é preciso para o `npm run android`, que
+> compila e instala um APK — ver a secção seguinte.
+
+**1. Abrir a API à rede.** Por omissão ela só ouve em loopback e o telemóvel não lhe chega.
+Em `ATMegaPestaV1.Api/appsettings.json`:
 
 ```json
 "Kestrel": { "Endpoints": { "Http": { "Url": "http://0.0.0.0:5099" } } }
 ```
 
-E descobrir o IP do computador (`ipconfig`, procurar o IPv4 da rede Wi-Fi).
+**2. Deixar passar na firewall do Windows**, numa consola como administrador:
 
-**2. Arrancar as duas coisas:**
+```powershell
+New-NetFirewallRule -DisplayName "ATMegaPesta API 5099" `
+  -Direction Inbound -LocalPort 5099 -Protocol TCP -Action Allow -Profile Private
+```
+
+Sem isto o telemóvel liga-se ao Metro mas nunca à API, e a app fica em erro no ecrã de
+ligação — um sintoma que se confunde facilmente com um endereço mal escrito.
+
+**3. Descobrir o IP do computador:**
+
+```powershell
+Get-NetIPAddress -AddressFamily IPv4 | Where-Object InterfaceAlias -like '*Wi*'
+```
+
+É o IPv4 da placa Wi-Fi. Ignora endereços `172.*` de switches virtuais do Hyper-V/WSL — o
+telemóvel não os alcança.
+
+**4. Arrancar as duas coisas:**
 
 ```bash
 dotnet run --project ATMegaPestaV1.Api    # numa consola
 npm run start:mobile                       # noutra, a partir da raiz do repo
 ```
 
-**3.** Ler o código QR que aparece na consola, com a Expo Go. No primeiro ecrã da app,
-escrever o endereço da bancada (ex.: `http://192.168.1.50:5099`) e ligar. Fica guardado.
+**5.** Ler o código QR que aparece na consola, com a Expo Go. No primeiro ecrã da app,
+escrever o endereço da bancada (ex.: `http://192.168.1.92:5099`) e ligar. Fica guardado.
 
 ## Fazer o APK instalável
 

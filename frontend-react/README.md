@@ -81,18 +81,26 @@ Abrir <http://localhost:5099>.
 
 | Chave | O que faz |
 |---|---|
-| `MaxTentativas` | Tentativas de detecção antes de desistir. |
+| `MaxAttempts` | Tentativas de detecção antes de desistir. |
 | `BaudRate`, `SerialTimeoutMs` | Ligação série ao master. |
-| `VerificarAssinatura` | `false` para firmware antigo, que não responde à opção 1. |
-| `PastaCopias` | Onde ficam as cópias. Vazio → `Documentos/ATMegaPesta/Copias`. |
-| `OrigensPermitidas` | Origens com CORS — o dev server do Vite. A app Android não precisa: CORS é uma regra de browser. |
+| `VerifySignature` | `false` para firmware antigo, que não responde à opção 1. |
+| `BackupFolder` | Onde ficam as cópias. Vazio → `Documentos/ATMegaPesta/Copias`. |
+| `AllowedOrigins` | Origens com CORS — o dev server do Vite. A app Android não precisa: CORS é uma regra de browser. |
 | `Kestrel:Endpoints:Http:Url` | `http://localhost:5099`. |
 
 ### Abrir à rede local
 
-Por omissão a API só aceita ligações do próprio PC. Para o React Native num telefone
-chegar à bancada, trocar o URL do Kestrel por `http://0.0.0.0:5099` e acrescentar a origem
-do telefone a `OrigensPermitidas`.
+Por omissão a API só ouve em loopback. Para o React Native num telefone chegar à bancada,
+trocar o URL do Kestrel por `http://0.0.0.0:5099` **e abrir a porta na firewall do
+Windows** — é este segundo passo que costuma faltar:
+
+```powershell
+New-NetFirewallRule -DisplayName "ATMegaPesta API 5099" `
+  -Direction Inbound -LocalPort 5099 -Protocol TCP -Action Allow -Profile Private
+```
+
+Não é preciso mexer em `AllowedOrigins`: como diz a tabela acima, CORS é uma regra de
+browser e o `fetch` do React Native não envia cabeçalho `Origin`.
 
 Vale a pena decidir isso de propósito: esta API comuta o barramento ISP e transfere
 programas para o chip-alvo. Aberta à rede, quem estiver nela consegue fazê-lo.
@@ -102,7 +110,7 @@ programas para o chip-alvo. Aberta à rede, quem estiver nela consegue fazê-lo.
 Não são omissões — são coisas que no browser não se fazem da mesma maneira.
 
 - **Pasta da cópia.** O WPF abre um selector de pastas. O browser não escolhe pastas do
-  servidor, por isso a cópia fica em `PastaCopias`, numa subpasta com o carimbo da hora, e
+  servidor, por isso a cópia fica em `BackupFolder`, numa subpasta com o carimbo da hora, e
   descarrega-se pelos links que a resposta traz.
 - **Encerrar a aplicação.** Onde o WPF fecha a janela (tentativas esgotadas, recusa da alta
   tensão), o React oferece recomeçar o ciclo — não há aplicação para fechar.
