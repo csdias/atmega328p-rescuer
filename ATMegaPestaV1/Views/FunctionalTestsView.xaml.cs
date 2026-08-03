@@ -298,7 +298,9 @@ public partial class FunctionalTestsView : UserControl
                 // The chip answered — the way in is not in question, so this does not
                 // count as a read failure nor consume attempts.
                 SetConfigState($"{mcu.Name} detetado, mas a leitura dos fuses falhou.", AmberColour);
-                ShowAvrdudeOutput(fuses.Output);
+                // The read is what failed, and this card is where it is reported: opening
+                // it is the point.
+                ShowAvrdudeOutput(fuses.Output, expand: true);
                 return true;
             }
 
@@ -432,13 +434,22 @@ public partial class FunctionalTestsView : UserControl
         BadgeMcuState.Style = (Style)FindResource(badgeStyle);
     }
 
-    private void ShowAvrdudeOutput(string text)
+    /// <summary>
+    /// Puts avrdude's raw output in the settings card.
+    ///
+    /// <paramref name="expand"/> has no default on purpose. Whether the accordion should
+    /// open is the caller's business: when the read is what failed, the card is the
+    /// subject and opening it is the point; when the failure belongs to a later step that
+    /// reports itself elsewhere, forcing it open throws the whole settings panel back on
+    /// screen over what the student is actually being told.
+    /// </summary>
+    private void ShowAvrdudeOutput(string text, bool expand)
     {
         TxtConfigOutput.Text = text.Length > 600 ? text[^600..] : text;
         ConfigErrorPanel.Visibility = Visibility.Visible;
 
-        // Showing the error inside a closed accordion is not much use.
-        ToggleConfigDetails.IsChecked = true;
+        if (expand)
+            ToggleConfigDetails.IsChecked = true;
     }
 
     private void ClearSettings()
@@ -799,7 +810,12 @@ public partial class FunctionalTestsView : UserControl
                 SetIntegrityCheckState(
                     "A cópia falhou — a verificação não avançou e o chip fica como está.",
                     RedColour);
-                ShowAvrdudeOutput(backup.Output);
+
+                // The output is filed away for whoever wants it, but the accordion stays
+                // as the integrity step left it — closed. What failed was the backup, a
+                // dialog is about to say so, and re-opening the settings would put the
+                // whole panel back on screen behind it.
+                ShowAvrdudeOutput(backup.Output, expand: false);
 
                 return new BackupOutcome(false, "A cópia falhou",
                     "Não foi possível ler a Flash, a EEPROM e os fuses do chip-alvo. " +
