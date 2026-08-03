@@ -71,6 +71,39 @@ O código-fonte do firmware está em `Prog_Tester_V1.2.txt`; os sketches do Uno 
 Hi-Z (opção `4`). Corre mesmo quando a operação falha a meio — não se deixa o programador
 ligado ao alvo.
 
+### Estados do barramento
+
+Só um pode conduzir o barramento de cada vez. Dois mestres em simultâneo danificam o alvo,
+e é por isso que o isolamento corre sempre em `finally`.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> HiZ : arranque do firmware
+
+    HiZ : Hi-Z
+    HiZ : ninguém conduz o barramento
+    USBAsp : USBAsp
+    USBAsp : avrdude chega ao chip-alvo
+    Mega : ATmega2560
+    Mega : o master exercita os pinos
+
+    HiZ --> USBAsp : "2" · MenuTester.EnableUsbAsp
+    HiZ --> Mega : "3" · MenuTester.EnableMegaMaster
+    USBAsp --> HiZ : "4" · MenuTester.IsolateBus
+    Mega --> HiZ : "4" · MenuTester.IsolateBus
+
+    note right of HiZ
+        Toda a operação acaba aqui,
+        mesmo quando falha a meio.
+    end note
+```
+
+As transições estão anotadas com o carácter que vai para a porta série **e** com a
+constante que o guarda. Assim uma renomeação aparece num `grep` e uma alteração ao firmware
+obriga a tocar neste ficheiro — foi por não ter isso que o diagrama anterior deste projecto
+derivou uma posição e ninguém deu por ela.
+
 ---
 
 ## Os cinco projectos
@@ -97,6 +130,47 @@ está partilhado.
 
 Detalhes de cada uma: [`frontend-react/README.md`](frontend-react/README.md) e
 [`frontend-mobile/README.md`](frontend-mobile/README.md).
+
+### Quem conduz a bancada
+
+O WPF e a API são **duas aplicações independentes sobre o mesmo hardware**. Nenhuma sabe da
+outra.
+
+```mermaid
+flowchart LR
+    WPF["ATMegaPestaV1<br/><i>WPF</i>"]
+    API["ATMegaPestaV1.Api<br/><i>semáforo interno</i>"]
+    CORE["ATMegaPestaV1.Core<br/>BusManager · UsbAspService"]
+    COM["COM3<br/><i>aberta e fechada a cada comando</i>"]
+    ISP["USBAsp<br/><i>avrdude</i>"]
+    MASTER["ATmega2560<br/>Prog_Tester V1.2"]
+    ALVO["ATmega328P<br/><i>no ZIF</i>"]
+
+    WPF --> CORE
+    API --> CORE
+    CORE --> COM --> MASTER
+    CORE --> ISP
+    MASTER -.->|comuta| BUS(["barramento ISP"])
+    ISP --> BUS --> ALVO
+
+    linkStyle default stroke-width:1px
+```
+
+O `SemaphoreSlim` do `BenchService` serializa os pedidos HTTP **entre si**. Entre as duas
+aplicações não há arbitragem nenhuma — e como a porta série é aberta e fechada a cada
+comando, elas não competem por ela: interleavam com sucesso.
+
+```
+WPF  → "2"  →  USBAsp no barramento     (porta fecha)
+API  → "3"  →  Mega no barramento       (porta fecha)
+WPF  → avrdude, a contar com o USBAsp   →  já não está lá
+```
+
+**Corra uma de cada vez.** Em produção a API serve o React na mesma porta, por isso o caso
+normal é só uma aplicação de pé; o risco é em desenvolvimento, com as duas abertas.
+
+> Isto é leitura do código, não observação com a bancada ligada. Um mutex nomeado no
+> `ServiceFactory` fecharia a porta a este cenário.
 
 ---
 
@@ -292,3 +366,60 @@ ecrã "por implementar".
 
 O passo 5 só destranca com a leitura do passo 3 **inteira** (chip identificado *e* fuses
 descodificados): verificar pinos sem saber o estado dos fuses é medir sem saber contra quê.
+
+### As condições e os contadores
+
+O que interessa aqui não são as caixas, são as **condições de passagem** e o que acontece
+quando as tentativas se esgotam — cada contador tem um destino diferente.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Verificacao
+
+    Verificacao : Verificação de dispositivos
+    Verificacao : CH340 + USBAsp + assinatura
+    InserirChip : Inserir o chip no ZIF
+    Leitura : Leitura das configurações
+    Leitura : comuta · identifica · descodifica · isola
+    Copia : Cópia de segurança
+    Copia : Flash + EEPROM + ficha dos fuses
+    Integridade : Verificação de integridade
+    Integridade : nada é medido — ver acima
+
+    Verificacao --> InserirChip : Complete && assinatura válida
+    Verificacao --> Encerrar : 3 de 3 sem sucesso
+
+    InserirChip --> Leitura : chip confirmado no ZIF
+
+    Leitura --> Integridade : settingsRead
+    Leitura --> AltaTensao : 3 de 3 falhas de ISP
+
+    note left of Leitura
+        Chip a responder mas fuses
+        ilegíveis: fica aqui, e
+        não gasta tentativa.
+    end note
+
+    Integridade --> Copia : escolheu guardar cópia
+    Integridade --> [*] : escolheu prosseguir sem cópia
+
+    Copia --> Integridade : cópia guardada
+    Copia --> Admin : 3 de 3 sem sucesso (só WPF)
+
+    Encerrar : Propõe encerrar
+    Encerrar : "contacte a assistência técnica"
+    AltaTensao : Propõe alta tensão
+    AltaTensao : o ISP esgotou-se como via de acesso
+    Admin : "contacte o administrador do sistema"
+```
+
+Três pormenores que o diagrama torna visíveis e o código só diz em comentários:
+
+- **O passo seguinte abre com `settingsRead`, não com `identified`.** Um chip que responde
+  ao ISP mas cujos fuses não se descodificam continua trancado — e essa falha **não gasta
+  tentativa**, porque a via de acesso não está em causa.
+- **Os três contadores de 3 tentativas levam a sítios diferentes:** assistência técnica,
+  programação de alta tensão, administrador do sistema.
+- **As retentativas da cópia existem só no WPF.** Na API a cópia é uma tentativa única —
+  `BenchService` não tem o ciclo que o `FunctionalTestsView` tem. Uma divergência real entre
+  os dois front ends, não uma simplificação do desenho.
