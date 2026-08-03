@@ -695,12 +695,7 @@ public partial class FunctionalTestsView : UserControl
     /// <c>null</c> from <see cref="SaveChipBackupAsync"/> means the student cancelled —
     /// they know what they did, so nothing is shown.
     /// </summary>
-    /// <param name="Retryable">
-    /// Another go could plausibly work. False for the failure that is not about reaching
-    /// the chip: the memories are already on disk and it was the sheet that would not be
-    /// written, which repeating the ISP read does not fix.
-    /// </param>
-    private record BackupOutcome(bool Ok, string Title, string Message, bool Retryable = false);
+    private record BackupOutcome(bool Ok, string Title, string Message);
 
     /// <summary>
     /// Wait pointer for as long as the bench is busy. Application-wide on purpose: while
@@ -788,9 +783,7 @@ public partial class FunctionalTestsView : UserControl
         {
             var outcome = await TryBackupOnceAsync(flash, eeprom, sheet, folder);
 
-            // Worked, or failed for a reason a second go would not change (the memories
-            // are on disk and it was the sheet that would not write).
-            if (outcome.Ok || !outcome.Retryable)
+            if (outcome.Ok)
                 return outcome;
 
             if (attempt >= MaxBackupAttempts)
@@ -833,52 +826,41 @@ public partial class FunctionalTestsView : UserControl
 
         try
         {
+            // Routing the bus to the USBAsp.
             var busRes = await _busManager.SelectUsbAspAsync();
 
             if (busRes is not null && busRes.StartsWith("Erro:"))
-            {
-                SetIntegrityCheckState("Não foi possível efetuar o backup.", RedColour);
-                return new BackupOutcome(false, "Não foi possível efetuar o backup.",
-                    busRes, Retryable: true);
-            }
+                return Failed(busRes);
 
             busActive = true;
 
+            // Reading Flash and EEPROM off the chip. avrdude writes the two .hex itself, so
+            // a disk that refuses them — full, read-only, path rejected — fails right here
+            // along with a chip that will not answer. The service also checks the files
+            // came out existing and non-empty, which catches an avrdude that claims success
+            // over nothing.
             var backup = await _usbAspService.SaveBackupAsync(flash, eeprom);
             AppendLog(backup.Output);
 
             if (!backup.Success)
             {
-                SetIntegrityCheckState("Não foi possível efetuar o backup.", RedColour);
-
                 // The output is filed away for whoever wants it, but the accordion stays
-                // as the integrity step left it — closed. What failed was the backup, a
-                // dialog is about to say so, and re-opening the settings would put the
-                // whole panel back on screen behind it.
+                // as the integrity step left it — closed. A dialog is about to say what
+                // happened, and re-opening the settings would put the whole panel back on
+                // screen behind it.
                 ShowAvrdudeOutput(backup.Output, expand: false);
-
-                return new BackupOutcome(false, "Não foi possível efetuar o backup.",
-                    "A saída do avrdude está no cartão das configurações.",
-                    Retryable: true);
+                return Failed("A saída do avrdude está no cartão das configurações.");
             }
 
-            // The fuse sheet is written here, and not in the service: the bytes come from
-            // avrdude, but what they mean is what the FuseDecoder knows.
+            // Writing the fuse sheet. This one is ours — File.WriteAllText, and the only
+            // disk write the application makes on its own.
             try
             {
                 WriteFuseSheet(sheet, backup);
             }
             catch (Exception ex)
             {
-                SetIntegrityCheckState(
-                    $"As memórias foram guardadas mas a ficha dos fuses falhou: {ex.Message}",
-                    RedColour);
-
-                return new BackupOutcome(false, "Cópia incompleta",
-                    "A Flash e a EEPROM foram guardadas, mas a ficha dos fuses não:\n\n" +
-                    $"{ex.Message}\n\n" +
-                    "Sem os fuses a cópia repõe as memórias mas não o chip — voltaria a " +
-                    "correr com outro relógio ou com o ISP fechado.");
+                return Failed(ex.Message);
             }
 
             var f = backup.Fuses;
@@ -896,12 +878,31 @@ public partial class FunctionalTestsView : UserControl
                 $"    {System.IO.Path.GetFileName(eeprom)}\n" +
                 $"    {System.IO.Path.GetFileName(sheet)}");
         }
+        catch (Exception ex)
+        {
+            // Whatever got past the checks above. The three named paths cover reading the
+            // chip and both writes, but "handled" has to mean handled: a path the file
+            // system rejects, a device pulled mid-read, anything unforeseen. Without this
+            // the exception would leave through an async void handler and take the whole
+            // application with it, which at a bench with a chip in the socket is the worst
+            // way to fail.
+            return Failed(ex.Message);
+        }
         finally
         {
             if (busActive && !await IsolateBusAsync())
                 SetIntegrityCheckState(
                     TxtIntegrityCheck.Text + "  ·  ATENÇÃO: falha ao isolar o barramento",
                     AmberColour);
+        }
+
+        // One sentence for every way a backup can fail — reaching the chip or writing to
+        // the disk. Telling the two apart would only ask the student to diagnose something
+        // they cannot act on differently; the detail goes in the body, for whoever wants it.
+        BackupOutcome Failed(string detail)
+        {
+            SetIntegrityCheckState("Não foi possível efetuar o backup.", RedColour);
+            return new BackupOutcome(false, "Não foi possível efetuar o backup.", detail);
         }
     }
 
