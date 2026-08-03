@@ -794,11 +794,7 @@ public partial class FunctionalTestsView : UserControl
                 return outcome;
 
             if (attempt >= MaxBackupAttempts)
-                return outcome with
-                {
-                    Message = $"{MaxBackupAttempts} de {MaxBackupAttempts} tentativas sem sucesso.\n\n" +
-                              "Por favor, contacte o administrador do sistema."
-                };
+                return outcome with { Message = "Por favor, contacte o administrador do sistema." };
 
             // Safe to ask: TryBackupOnceAsync isolates the bus before returning.
             var again = new MessageDialog(
@@ -841,7 +837,7 @@ public partial class FunctionalTestsView : UserControl
 
             if (busRes is not null && busRes.StartsWith("Erro:"))
             {
-                SetIntegrityCheckState(busRes, RedColour);
+                SetIntegrityCheckState("Não foi possível efetuar o backup.", RedColour);
                 return new BackupOutcome(false, "Não foi possível efetuar o backup.",
                     busRes, Retryable: true);
             }
@@ -853,9 +849,7 @@ public partial class FunctionalTestsView : UserControl
 
             if (!backup.Success)
             {
-                SetIntegrityCheckState(
-                    "A cópia falhou — a verificação não avançou e o chip fica como está.",
-                    RedColour);
+                SetIntegrityCheckState("Não foi possível efetuar o backup.", RedColour);
 
                 // The output is filed away for whoever wants it, but the accordion stays
                 // as the integrity step left it — closed. What failed was the backup, a
