@@ -9,12 +9,16 @@
                        FontSize="48"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,16"/>
+            <!-- These two were #CDD6F4 and #A6ADC8, Catppuccin Mocha text colours from a
+                 dark theme that never existed: 1.33:1 and 2.04:1 over the #F5F5F5
+                 background, against the 4.5:1 text needs. This screen is reachable from
+                 two menu entries, so it was two menu entries that looked blank. -->
             <TextBlock x:Name="TxtTitle"
-                       Foreground="#CDD6F4" FontSize="22" FontWeight="Bold"
+                       Foreground="{DynamicResource BrushTextTitle}" FontSize="22" FontWeight="Bold"
                        HorizontalAlignment="Center"
                        Margin="0,0,0,8"/>
             <TextBlock Text="Este módulo encontra-se em desenvolvimento."
-                       Foreground="#A6ADC8" FontSize="14"
+                       Foreground="{DynamicResource BrushTextNormal}" FontSize="14"
                        HorizontalAlignment="Center"/>
         </StackPanel>
     </Grid>

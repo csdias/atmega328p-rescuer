@@ -2,9 +2,9 @@ using System.Windows;
 
 namespace ATMegaPestaV1.Views;
 
-public partial class HelpDialog : Window
+public partial class MessageDialog : Window
 {
-    public HelpDialog(string title, string content)
+    public MessageDialog(string title, string content)
     {
         InitializeComponent();
         TxtTitle.Text = title;

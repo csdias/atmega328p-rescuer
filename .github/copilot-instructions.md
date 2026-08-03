@@ -147,8 +147,13 @@ npm run lint
 ## Problemas conhecidos — não são para "arrumar" de passagem
 
 - **`--radius-pill` é usado e nunca declarado** em `styles.css`.
-- **`BtnHelp_Click`, `HelpTopics` e `HelpDialog` são código morto** no WPF: o estilo
-  `HelpButton` existe mas nenhum botão o usa, e nenhum `Tag=` liga ao dicionário.
+- **`BtnHelp_Click` e `HelpTopics` continuam sem quem os chame** no WPF: o estilo
+  `HelpButton` existe mas nenhum botão o usa, e nenhum `Tag=` liga ao dicionário. O
+  diálogo em si deixou de ser código morto — é agora o `MessageDialog`, usado para
+  reportar o fim de uma cópia.
+- **O estilo `BadgeRunning` está definido e nunca é usado** (`FunctionalTestsView.xaml`),
+  porque nada chega a correr. É a única cor literal que resta fora do tema (`#1A72C7`);
+  não lhe foi inventada uma chave por não haver quem a use.
 - **Só existe `LightTheme.xaml`.** Os comentários do XAML falam de temas vintage e escuro —
   são de uma intenção que não chegou a existir.
 - **A verificação de integridade não mede nada** (ver invariante 3). Não é um bug para

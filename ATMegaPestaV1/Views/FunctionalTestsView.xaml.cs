@@ -621,9 +621,24 @@ public partial class FunctionalTestsView : UserControl
         {
             // A backup asked for and not obtained stops the check: proceeding would mean
             // writing over the chip exactly after the user said they wanted to keep it.
-            if (warning.Choice == TransferChoice.ProceedWithBackup &&
-                !await SaveChipBackupAsync())
-                return;
+            if (warning.Choice == TransferChoice.ProceedWithBackup)
+            {
+                var outcome = await SaveChipBackupAsync();
+
+                // null means the student cancelled — they know, no need to be told.
+                if (outcome is null)
+                    return;
+
+                // Safe to open a modal here: SaveChipBackupAsync isolates the bus in its
+                // own finally, so ISP is no longer connected to the target.
+                new MessageDialog(outcome.Title, outcome.Message)
+                {
+                    Owner = Window.GetWindow(this)
+                }.ShowDialog();
+
+                if (!outcome.Ok)
+                    return;
+            }
 
             SetIntegrityCheckState("A comutar o barramento para o ATmega2560...", AmberColour);
             var megaRes = await _busManager.SwitchToMegaAsync();
@@ -664,34 +679,73 @@ public partial class FunctionalTestsView : UserControl
     }
 
     /// <summary>
-    /// Asks for the folder and saves the target chip's Flash and EEPROM as Intel HEX.
-    /// Routes the bus to the USBAsp and isolates it again, like any ISP access in this
-    /// app. Returns false if the user gives up on the folder or if the backup does not
-    /// come out whole.
+    /// How a backup ended, for the caller to report once the bus is already isolated.
+    /// <c>null</c> from <see cref="SaveChipBackupAsync"/> means the student cancelled —
+    /// they know what they did, so nothing is shown.
     /// </summary>
-    private async Task<bool> SaveChipBackupAsync()
+    private record BackupOutcome(bool Ok, string Title, string Message);
+
+    /// <summary>
+    /// Asks for a file name and saves the target chip's Flash and EEPROM as Intel HEX,
+    /// plus the fuse sheet. Routes the bus to the USBAsp and isolates it again, like any
+    /// ISP access in this app — so by the time this returns, ISP is no longer connected
+    /// and the caller may open a modal.
+    /// </summary>
+    private async Task<BackupOutcome?> SaveChipBackupAsync()
     {
-        var folderChoice = new OpenFolderDialog
+        // The student names the backup; the three files derive from that one name. The
+        // name is what identifies whose chip this was months later — a timestamp alone
+        // does not, once several parts have been through the bench.
+        var choice = new SaveFileDialog
         {
-            Title = "Onde guardar a cópia do microcontrolador"
+            Title = "Nome para a cópia do microcontrolador",
+            FileName = $"ATmega328P_{DateTime.Now:yyyyMMdd_HHmmss}",
+            DefaultExt = ".hex",
+            Filter = "Cópia do microcontrolador|*.hex",
+            // The picked name is a base, never written as-is: Windows would ask about
+            // overwriting a file that is not one of the three we produce.
+            OverwritePrompt = false
         };
 
-        if (folderChoice.ShowDialog() != true)
+        if (choice.ShowDialog() != true)
         {
             SetIntegrityCheckState(
                 "Cópia cancelada — a verificação não avançou e o chip fica como está.",
                 AmberColour);
-            return false;
+            return null;
         }
 
-        // Timestamped on the spot: whoever brings several parts to the bench does not end
-        // up with backups overlapping each other with no way to tell which is which.
-        var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         // System.IO.Path spelled out: this file's System.Windows.Shapes.Path (the LEDs'
         // Ellipse comes from there) makes the short name ambiguous.
-        var flash  = System.IO.Path.Combine(folderChoice.FolderName, $"ATmega328P_{timestamp}_flash.hex");
-        var eeprom = System.IO.Path.Combine(folderChoice.FolderName, $"ATmega328P_{timestamp}_eeprom.hex");
-        var sheet  = System.IO.Path.Combine(folderChoice.FolderName, $"ATmega328P_{timestamp}_fuses.txt");
+        var folder = System.IO.Path.GetDirectoryName(choice.FileName) ?? "";
+        var name   = System.IO.Path.GetFileNameWithoutExtension(choice.FileName);
+
+        var flash  = System.IO.Path.Combine(folder, $"{name}_flash.hex");
+        var eeprom = System.IO.Path.Combine(folder, $"{name}_eeprom.hex");
+        var sheet  = System.IO.Path.Combine(folder, $"{name}_fuses.txt");
+
+        // Overwriting is checked here because the dialog could not: it never saw these
+        // three names. Silently replacing an earlier backup would defeat the point of
+        // making one.
+        var existing = new[] { flash, eeprom, sheet }.Where(File.Exists).ToList();
+
+        if (existing.Count > 0)
+        {
+            var answer = MessageBox.Show(
+                "Já existem ficheiros com este nome:\n\n" +
+                string.Join("\n", existing.Select(System.IO.Path.GetFileName)) +
+                "\n\nSubstituir?",
+                "Cópia do microcontrolador",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                SetIntegrityCheckState(
+                    "Cópia cancelada — a verificação não avançou e o chip fica como está.",
+                    AmberColour);
+                return null;
+            }
+        }
 
         SetIntegrityCheckState(
             "A guardar a Flash, a EEPROM e os fuses do chip-alvo...", AmberColour);
@@ -705,7 +759,8 @@ public partial class FunctionalTestsView : UserControl
             if (busRes is not null && busRes.StartsWith("Erro:"))
             {
                 SetIntegrityCheckState(busRes, RedColour);
-                return false;
+                return new BackupOutcome(false, "A cópia não foi feita",
+                    "Não foi possível encaminhar o barramento para o USBAsp.\n\n" + busRes);
             }
 
             busActive = true;
@@ -719,7 +774,11 @@ public partial class FunctionalTestsView : UserControl
                     "A cópia falhou — a verificação não avançou e o chip fica como está.",
                     RedColour);
                 ShowAvrdudeOutput(backup.Output);
-                return false;
+
+                return new BackupOutcome(false, "A cópia falhou",
+                    "Não foi possível ler a Flash, a EEPROM e os fuses do chip-alvo. " +
+                    "A verificação não avançou e o chip fica exactamente como estava.\n\n" +
+                    "A saída do avrdude está no cartão das configurações.");
             }
 
             // The fuse sheet is written here, and not in the service: the bytes come from
@@ -733,15 +792,28 @@ public partial class FunctionalTestsView : UserControl
                 SetIntegrityCheckState(
                     $"As memórias foram guardadas mas a ficha dos fuses falhou: {ex.Message}",
                     RedColour);
-                return false;
+
+                return new BackupOutcome(false, "Cópia incompleta",
+                    "A Flash e a EEPROM foram guardadas, mas a ficha dos fuses não:\n\n" +
+                    $"{ex.Message}\n\n" +
+                    "Sem os fuses a cópia repõe as memórias mas não o chip — voltaria a " +
+                    "correr com outro relógio ou com o ISP fechado.");
             }
 
             var f = backup.Fuses;
             SetIntegrityCheckState(
-                $"Cópia guardada em {folderChoice.FolderName} — Flash, EEPROM e fuses " +
+                $"Cópia guardada em {folder} — Flash, EEPROM e fuses " +
                 $"(L {f.Low}  H {f.High}  E {f.Extended}  LB {f.Lock ?? "n/d"})",
                 GreenColour);
-            return true;
+
+            return new BackupOutcome(true, "Cópia guardada",
+                $"Pasta: {folder}\n\n" +
+                $"    {System.IO.Path.GetFileName(flash)}\n" +
+                $"    {System.IO.Path.GetFileName(eeprom)}\n" +
+                $"    {System.IO.Path.GetFileName(sheet)}\n\n" +
+                $"Fuse bits: L {f.Low}   H {f.High}   E {f.Extended}   LB {f.Lock ?? "n/d"}\n\n" +
+                "A ficha dos fuses traz o comando que os repõe. Guarde-a com os .hex: sem " +
+                "ela a cópia devolve as memórias mas não o estado do chip.");
         }
         finally
         {
@@ -793,7 +865,7 @@ public partial class FunctionalTestsView : UserControl
     {
         if (sender is Button btn && btn.Tag is string key && HelpTopics.TryGetValue(key, out var help))
         {
-            var dialog = new HelpDialog(help.Title, help.Content)
+            var dialog = new MessageDialog(help.Title, help.Content)
             {
                 Owner = Window.GetWindow(this)
             };

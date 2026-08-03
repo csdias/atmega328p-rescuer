@@ -1039,8 +1039,11 @@
                                         <TextBlock Text="Verificação de Integridade"
                                                    Foreground="{DynamicResource BrushTextTitle}"
                                                    FontSize="14" FontWeight="SemiBold"/>
+                                        <!-- Empty at rest: this is where the step reports what it is doing.
+                                             The description that used to sit here claimed the pins were
+                                             exercised, which is the one thing this step does not do. -->
                                         <TextBlock x:Name="TxtIntegrityCheck"
-                                                   Text="Comuta o barramento para o ATmega2560 e exercita os pinos do chip-alvo."
+                                                   Text=""
                                                    Foreground="{DynamicResource BrushTextNormal}"
                                                    FontSize="12.5" Margin="0,3,0,0" TextWrapping="Wrap"/>
                                     </StackPanel>
