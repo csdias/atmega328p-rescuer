@@ -837,9 +837,7 @@ public partial class FunctionalTestsView : UserControl
                 $"    {System.IO.Path.GetFileName(flash)}\n" +
                 $"    {System.IO.Path.GetFileName(eeprom)}\n" +
                 $"    {System.IO.Path.GetFileName(sheet)}\n\n" +
-                $"Fuse bits: L {f.Low}   H {f.High}   E {f.Extended}   LB {f.Lock ?? "n/d"}\n\n" +
-                "A ficha dos fuses traz o comando que os repõe. Guarde-a com os .hex: sem " +
-                "ela a cópia devolve as memórias mas não o estado do chip.");
+                $"Fuse bits: L {f.Low}   H {f.High}   E {f.Extended}   LB {f.Lock ?? "n/d"}");
         }
         finally
         {
@@ -851,9 +849,8 @@ public partial class FunctionalTestsView : UserControl
     }
 
     /// <summary>
-    /// Writes the backup's sheet. The text is built in the Core — the API writes the same
-    /// sheet, and the fuse restore command that goes in it must not diverge between the
-    /// two front ends.
+    /// Writes the backup's sheet. The text is built in the Core because the API writes the
+    /// same sheet, and the two must not drift apart.
     /// </summary>
     private void WriteFuseSheet(string path, BackupResult backup)
     {

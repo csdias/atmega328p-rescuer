@@ -5,9 +5,16 @@ ensino. O aluno traz um ATmega328P que deixou de responder — tipicamente com o
 gravados — e a bancada tenta chegar-lhe, ler o que lá está e guardar uma cópia antes de se
 mexer em fusível nenhum.
 
-**Esta aplicação nunca grava fuses.** Lê-os, descodifica-os e escreve o comando de reposição
-numa ficha de texto, para quem quiser repô-los o fazer por sua conta e risco. Um valor
-errado nessa linha fecha o ISP e o chip só volta por programação de alta tensão.
+**Esta aplicação, hoje, nunca grava fuses.** Lê-os, descodifica-os e guarda-os numa ficha
+de texto junto às memórias — um registo de como o chip estava, e nada mais.
+
+A ficha **não traz** um comando de reposição, de propósito. Uma linha
+`avrdude -U lfuse:w:…` num ficheiro de texto convida a que alguém a cole à mão, e um valor
+errado aí fecha o ISP de vez: o chip só volta por programação de alta tensão.
+
+Repor os fuses passará a ser trabalho da aplicação, com os valores vindos desta mesma
+leitura em vez de reescritos por alguém. **Essa parte ainda não existe** — hoje o
+`UsbAspService` não tem sequer com que gravar fuses.
 
 ---
 

@@ -4,12 +4,17 @@ using ATMegaPestaV1.Services;
 namespace ATMegaPestaV1.Backups;
 
 /// <summary>
-/// The sheet that goes with a backup: the fuse bits in hexadecimal, what they mean, and
-/// the command that puts them back.
+/// The sheet that goes with a backup: the fuse bits in hexadecimal and what they mean.
+/// It is a record of how the chip was, nothing more.
 ///
-/// It lives in the Core, and not in the front end, because the restore command must not
-/// diverge between them — a wrong value on that line closes ISP and the chip only comes
-/// back through high voltage.
+/// It deliberately does <em>not</em> carry a restore command. Putting an
+/// <c>avrdude -U lfuse:w:…</c> line in a text file next to the .hex invites someone to
+/// paste it by hand, and a wrong value there closes ISP for good — the chip then only
+/// comes back through high-voltage programming. Restoring is the application's job,
+/// where the values come from this same reading instead of being retyped.
+///
+/// It lives in the Core, and not in a front end, because the WPF and the API write the
+/// same sheet and it must not drift between them.
 ///
 /// The sheet's text stays in Portuguese: it is what the student reads when they open the
 /// backup folder.
@@ -56,13 +61,6 @@ public static class FuseSheet
         sb.AppendLine("# Memórias guardadas nesta pasta");
         foreach (var file in backup.Files)
             sb.AppendLine($"#   {Path.GetFileName(file)}");
-
-        sb.AppendLine();
-        sb.AppendLine("# Reposição dos fuses — por sua conta, não por esta aplicação:");
-        sb.AppendLine($"#   avrdude -c usbasp -p m328p " +
-                      $"-U lfuse:w:{f.Low}:m -U hfuse:w:{f.High}:m -U efuse:w:{f.Extended}:m");
-        sb.AppendLine("# Um valor errado aqui fecha o ISP e o chip só volta por alta tensão.");
-        sb.AppendLine("# O lock byte não se repõe por escrita: só um chip erase o devolve a 0xFF.");
 
         return sb.ToString();
     }

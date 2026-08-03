@@ -58,8 +58,15 @@ nem chave `SimulationMode` — se encontrar referências a isso, estão erradas.
 
 ## Invariantes que não se quebram
 
-1. **A aplicação nunca grava fuses.** Lê-os, descodifica-os e escreve o comando de reposição
-   numa ficha de texto. Um valor errado fecha o ISP e o chip só volta por alta tensão.
+1. **Hoje a aplicação nunca grava fuses.** Lê-os, descodifica-os e guarda-os na ficha de
+   texto que acompanha a cópia — um registo, não um procedimento.
+
+   **A ficha não leva comando de reposição.** Uma linha `avrdude -U lfuse:w:…` num ficheiro
+   de texto convida a ser colada à mão, e um valor errado aí fecha o ISP de vez: o chip só
+   volta por alta tensão. Não volte a pôr o comando na ficha.
+
+   A reposição passará a ser feita pela aplicação, com os valores vindos desta leitura —
+   mas **ainda não está implementada**: o `UsbAspService` não expõe nenhuma escrita.
 2. **Depois de qualquer acesso ISP, o barramento volta a Hi-Z** (opção `4` do menu). Corre
    em `finally`, mesmo quando a operação falha a meio.
 3. **Nada inventa resultados de medição.** A verificação de integridade devolve tudo
