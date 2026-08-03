@@ -832,12 +832,14 @@ public partial class FunctionalTestsView : UserControl
                 $"(L {f.Low}  H {f.High}  E {f.Extended}  LB {f.Lock ?? "n/d"})",
                 GreenColour);
 
+            // Only what was written and where. The fuse values are already on the card's
+            // status line and inside the sheet itself — repeating them here a third time
+            // adds nothing to read.
             return new BackupOutcome(true, "Cópia guardada",
                 $"Pasta: {folder}\n\n" +
                 $"    {System.IO.Path.GetFileName(flash)}\n" +
                 $"    {System.IO.Path.GetFileName(eeprom)}\n" +
-                $"    {System.IO.Path.GetFileName(sheet)}\n\n" +
-                $"Fuse bits: L {f.Low}   H {f.High}   E {f.Extended}   LB {f.Lock ?? "n/d"}");
+                $"    {System.IO.Path.GetFileName(sheet)}");
         }
         finally
         {
