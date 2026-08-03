@@ -60,8 +60,17 @@
                        TextWrapping="Wrap" LineHeight="22"/>
         </ScrollViewer>
 
-        <Button Grid.Row="4" Content="Fechar" Style="{StaticResource CloseButton}"
-                IsDefault="True" IsCancel="True"
-                HorizontalAlignment="Right" Click="BtnClose_Click"/>
+        <!-- BtnAction only appears when the dialog is asking something; see the
+             code-behind. Laid out right to left so Fechar keeps its place either way. -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="BtnAction" Style="{StaticResource CloseButton}"
+                    Visibility="Collapsed" Margin="0,0,8,0"
+                    Click="BtnAction_Click"/>
+            <!-- IsCancel is what closes this: on a dialog it sets DialogResult to false and
+                 shuts the window, and it brings Esc with it. No Click handler on purpose —
+                 a Close() alongside it would be a second mechanism racing the first. -->
+            <Button x:Name="BtnClose" Content="Fechar" Style="{StaticResource CloseButton}"
+                    IsDefault="True" IsCancel="True"/>
+        </StackPanel>
     </Grid>
 </Window>

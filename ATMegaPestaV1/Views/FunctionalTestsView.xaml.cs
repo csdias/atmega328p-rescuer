@@ -695,7 +695,12 @@ public partial class FunctionalTestsView : UserControl
     /// <c>null</c> from <see cref="SaveChipBackupAsync"/> means the student cancelled —
     /// they know what they did, so nothing is shown.
     /// </summary>
-    private record BackupOutcome(bool Ok, string Title, string Message);
+    /// <param name="Retryable">
+    /// Another go could plausibly work. False for the failure that is not about reaching
+    /// the chip: the memories are already on disk and it was the sheet that would not be
+    /// written, which repeating the ISP read does not fix.
+    /// </param>
+    private record BackupOutcome(bool Ok, string Title, string Message, bool Retryable = false);
 
     /// <summary>
     /// Wait pointer for as long as the bench is busy. Application-wide on purpose: while
@@ -778,15 +783,56 @@ public partial class FunctionalTestsView : UserControl
             }
         }
 
+        // The name and the overwrite question are asked once; only the ISP work repeats.
+        for (var attempt = 1; ; attempt++)
+        {
+            var outcome = await TryBackupOnceAsync(flash, eeprom, sheet, folder);
+
+            // Worked, or failed for a reason a second go would not change (the memories
+            // are on disk and it was the sheet that would not write).
+            if (outcome.Ok || !outcome.Retryable)
+                return outcome;
+
+            if (attempt >= MaxBackupAttempts)
+                return outcome with
+                {
+                    Message = $"{MaxBackupAttempts} de {MaxBackupAttempts} tentativas sem sucesso.\n\n" +
+                              "Por favor, contacte o administrador do sistema."
+                };
+
+            // Safe to ask: TryBackupOnceAsync isolates the bus before returning.
+            var again = new MessageDialog(
+                outcome.Title,
+                $"Tentativa {attempt} de {MaxBackupAttempts}.",
+                actionText: "Tentar novamente")
+            {
+                Owner = Window.GetWindow(this)
+            };
+
+            if (again.ShowDialog() != true)
+                return null;   // gave up — the card already says what happened
+        }
+    }
+
+    /// <summary>How many goes at the backup before sending the student to the administrator.</summary>
+    private const int MaxBackupAttempts = 3;
+
+    /// <summary>
+    /// One attempt at the backup. Routes the bus to the USBAsp and isolates it again, like
+    /// any ISP access in this app — so by the time this returns, ISP is no longer connected
+    /// and a modal may be opened over it.
+    /// </summary>
+    private async Task<BackupOutcome> TryBackupOnceAsync(
+        string flash, string eeprom, string sheet, string folder)
+    {
         SetIntegrityCheckState(
             "A guardar a Flash, a EEPROM e os fuses do chip-alvo...", AmberColour);
 
         var busActive = false;
 
         // From here to the end of the method the bench is talking to the chip: seconds of
-        // avrdude with the screen still. Scoped to start only now, after the file dialog
-        // and any overwrite question — a wait pointer over a window asking for a decision
-        // says the opposite of what it should.
+        // avrdude with the screen still. Scoped to the attempt itself, so the retry
+        // question is not asked under a wait pointer.
         using var busy = new WaitCursor();
 
         try
@@ -796,8 +842,8 @@ public partial class FunctionalTestsView : UserControl
             if (busRes is not null && busRes.StartsWith("Erro:"))
             {
                 SetIntegrityCheckState(busRes, RedColour);
-                return new BackupOutcome(false, "A cópia não foi feita",
-                    "Não foi possível encaminhar o barramento para o USBAsp.\n\n" + busRes);
+                return new BackupOutcome(false, "Não foi possível efetuar o backup.",
+                    busRes, Retryable: true);
             }
 
             busActive = true;
@@ -817,10 +863,9 @@ public partial class FunctionalTestsView : UserControl
                 // whole panel back on screen behind it.
                 ShowAvrdudeOutput(backup.Output, expand: false);
 
-                return new BackupOutcome(false, "A cópia falhou",
-                    "Não foi possível ler a Flash, a EEPROM e os fuses do chip-alvo. " +
-                    "A verificação não avançou e o chip fica exactamente como estava.\n\n" +
-                    "A saída do avrdude está no cartão das configurações.");
+                return new BackupOutcome(false, "Não foi possível efetuar o backup.",
+                    "A saída do avrdude está no cartão das configurações.",
+                    Retryable: true);
             }
 
             // The fuse sheet is written here, and not in the service: the bytes come from
