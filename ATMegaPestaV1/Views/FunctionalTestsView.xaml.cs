@@ -2,6 +2,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
@@ -686,6 +687,25 @@ public partial class FunctionalTestsView : UserControl
     private record BackupOutcome(bool Ok, string Title, string Message);
 
     /// <summary>
+    /// Wait pointer for as long as the bench is busy. Application-wide on purpose: while
+    /// avrdude has the chip, nothing else in this window would answer either.
+    ///
+    /// Disposable rather than a pair of calls so the pointer comes back even if something
+    /// throws on the way out — an hourglass left stuck reads as a frozen application, which
+    /// is worse than no hourglass at all.
+    ///
+    /// Restores whatever was there before instead of assuming null, so nesting is safe.
+    /// </summary>
+    private sealed class WaitCursor : IDisposable
+    {
+        private readonly Cursor? _previous = Mouse.OverrideCursor;
+
+        public WaitCursor() => Mouse.OverrideCursor = Cursors.Wait;
+
+        public void Dispose() => Mouse.OverrideCursor = _previous;
+    }
+
+    /// <summary>
     /// Asks for a file name and saves the target chip's Flash and EEPROM as Intel HEX,
     /// plus the fuse sheet. Routes the bus to the USBAsp and isolates it again, like any
     /// ISP access in this app — so by the time this returns, ISP is no longer connected
@@ -751,6 +771,12 @@ public partial class FunctionalTestsView : UserControl
             "A guardar a Flash, a EEPROM e os fuses do chip-alvo...", AmberColour);
 
         var busActive = false;
+
+        // From here to the end of the method the bench is talking to the chip: seconds of
+        // avrdude with the screen still. Scoped to start only now, after the file dialog
+        // and any overwrite question — a wait pointer over a window asking for a decision
+        // says the opposite of what it should.
+        using var busy = new WaitCursor();
 
         try
         {
